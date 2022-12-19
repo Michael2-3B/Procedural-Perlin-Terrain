@@ -14,4 +14,4 @@ But feel free to mess around with it!
 
 
 Try it here
-https://michael2-3b.github.io/Procedural-Perlin-Terrain/index.html
+https://michael2-3b.github.io/Procedural-Perlin-Terrain/
