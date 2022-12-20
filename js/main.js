@@ -316,7 +316,7 @@ function generateMap(){
   const myPeaks = document.getElementById('peaks-input').value;
   const waterLevel = document.getElementById('water-level').value;
   const beachSize = 1 + parseFloat(document.getElementById('beach-input').value);
-  const light = parseInt(document.getElementById('light-input').value);
+  const light = parseInt(document.getElementById('light-input').value) - 255;
 
   const map = perlinNoise(width, height, persistence, octaves, prng);
 
