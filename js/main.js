@@ -236,7 +236,7 @@ function perlinNoise(width, height, persistence, octaves, prng) {
 
       // Calculate the wavelength and amplitude for each octave
       for (let o = 0, wavelength = wavelengthValue; o < octaves; o++) {
-        wavelength = Math.max(wavelength / (o+1), 1);
+        wavelength = Math.max(wavelength / 2, 1);
         const amplitude = persistence / (o+1);
 
         // Calculate the coordinates of the grid cell that the point is in
