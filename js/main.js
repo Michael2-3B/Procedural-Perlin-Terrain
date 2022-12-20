@@ -46,7 +46,7 @@ function initializeRangeInput() {
   scaleValue.innerText = "Canvas Scale: " + scaleInput.value;
   zoomValue.innerText = "Iso Zoom: " + zoomInput.value;
   beachValue.innerText = "Beach Size: " + beachInput.value;
-  lightValue.innerText = "Light: " + lightInput.value;
+  lightValue.innerText = "World Light: " + lightInput.value;
   isoHeightValue.innerText = "Iso Height: " + isoHeightInput.value;
 
   isoHeightInput.addEventListener('input', function() {
@@ -55,7 +55,7 @@ function initializeRangeInput() {
   });
 
   lightInput.addEventListener('input', function() {
-    lightValue.innerHTML = "Light: " + document.getElementById('light-input').value;
+    lightValue.innerHTML = "World Light: " + document.getElementById('light-input').value;
     generateMap();
   });
 
