@@ -1,3 +1,5 @@
+const factor = 255;
+
 // Define a function to initialize the range input and span
 function initializeRangeInput() {
   // Get a reference to the range input and the span
@@ -12,9 +14,6 @@ function initializeRangeInput() {
 
   var waterLevel = document.getElementById('water-level');
   var waterValue = document.getElementById('water-value');
-
-  var factorInput = document.getElementById('factor-input');
-  var factorValue = document.getElementById('factor-value');
 
   var exponentInput = document.getElementById('exponent-input');
   var exponentValue = document.getElementById('exponent-value');
@@ -42,7 +41,6 @@ function initializeRangeInput() {
   octavesValue.innerText = "Octaves: " + octavesInput.value;
   wavelengthValue.innerText = "Wavelength: " + wavelengthInput.value;
   waterValue.innerText = "Water Level: " + waterLevel.value;
-  factorValue.innerText = "Factor: " + factorInput.value;
   exponentValue.innerText = "Exponent: " + exponentInput.value;
   peaksValue.innerText = "Peaks: " + peaksInput.value;
   scaleValue.innerText = "Canvas Scale: " + scaleInput.value;
@@ -84,11 +82,6 @@ function initializeRangeInput() {
 
   waterLevel.addEventListener('input', function() {
     waterValue.innerHTML = "Water Level: " + document.getElementById('water-level').value;
-    generateMap();
-  });
-
-  factorInput.addEventListener('input', function() {
-    factorValue.innerHTML = "Factor: " + document.getElementById('factor-input').value;
     generateMap();
   });
 
@@ -225,18 +218,6 @@ function resetAll() {
 }
 
 function randomizeInputs() {
-  document.getElementById('persistence-input').value = 1;
-  document.getElementById('persistence-value').innerHTML = "Persistence: " + 1;
-
-  document.getElementById('octaves-input').value = 5;
-  document.getElementById('octaves-value').innerHTML = "Octaves: " + 5;
-
-  document.getElementById('wavelength-input').value = 133
-  document.getElementById('wavelength-value').innerHTML = "Wavelength: " + 133;
-
-  document.getElementById('factor-input').value = 255;
-  document.getElementById('factor-value').innerHTML = "Factor: " + 255;
-
   document.getElementById('exponent-input').value = parseFloat(.1+.05*Math.floor(Math.random()*199));
   document.getElementById('exponent-value').innerHTML = "Exponent: " + document.getElementById('exponent-input').value;
 
@@ -263,13 +244,7 @@ class SeedablePRNG {
   }
 }
 
-function perlinNoise(width, height, persistence, octaves, prng) {
-
-  const wavelengthValue = document.getElementById('wavelength-input').value;
-  const myExponent = document.getElementById('exponent-input').value;
-  const myFactor = document.getElementById('factor-input').value;
-  const myPeaks = document.getElementById('peaks-input').value;
-  const waterLevel = document.getElementById('water-level').value;
+function perlinNoise(width, height, persistence, octaves, wavelengthValue, prng) {
 
   const offsetX = document.getElementById('offset-x-input').value;
   const offsetZ = document.getElementById('offset-z-input').value;
@@ -367,8 +342,8 @@ function generateMap(){
   const height = 100;
   const persistence = document.getElementById('persistence-input').value;
   const octaves = document.getElementById('octaves-input').value;
+  const wavelength = document.getElementById('wavelength-input').value;
   const myExponent = document.getElementById('exponent-input').value;
-  const myFactor = document.getElementById('factor-input').value;
   const myPeaks = document.getElementById('peaks-input').value;
   const waterLevel = document.getElementById('water-level').value;
   const beachSize = 1 + parseFloat(document.getElementById('beach-input').value);
@@ -376,7 +351,7 @@ function generateMap(){
   const zoom = 1 - parseFloat(document.getElementById('zoom-input').value);
 
   function colorLookup(elevation) {
-    let color = Math.max(0, Math.min(254, Math.floor(Math.pow((elevation + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
+    let color = Math.max(0, Math.min(254, Math.floor(Math.pow((elevation + 1) / 2 + parseFloat(myPeaks), myExponent) * factor)));
 
     let colors = new Array(3);
 
@@ -386,7 +361,7 @@ function generateMap(){
       colors = [color, Math.min(color+66,255), Math.min(color+192,255)];
     } else if (color < waterLevel) {
       colors = [color, Math.min(color+88,255), 255];
-    } else if (color <  Math.min(Math.floor(waterLevel*beachSize),myFactor/(2-beachSize)-waterLevel)) {
+    } else if (color <  Math.min(Math.floor(waterLevel*beachSize),factor/(2-beachSize)-waterLevel)) {
       colors = [Math.min(color+150,255), Math.min(color+100,255), color];
     } else if (color < 100) {
       colors = [color, color+88, color];
@@ -409,7 +384,7 @@ function generateMap(){
     return colors;
   }
 
-  const map = perlinNoise(width, height, persistence, octaves, prng);
+  const map = perlinNoise(width, height, persistence, octaves, wavelength, prng);
 
   // Generate a heatmap visualization of the Perlin noise values
 
@@ -458,17 +433,17 @@ function generateMap(){
         let mapvalue2 = map[x][y+1];
         let mapvalue3 = map[x+1][y+1];
 
-        if (mapvalue < (waterLevel/(myFactor/2)-1)) {
-          mapvalue = waterLevel/(myFactor/2)-1;
+        if (mapvalue < (waterLevel/(factor/2)-1)) {
+          mapvalue = waterLevel/(factor/2)-1;
         }
-        if (mapvalue1 < (waterLevel/(myFactor/2)-1)) {
-          mapvalue1 = waterLevel/(myFactor/2)-1;
+        if (mapvalue1 < (waterLevel/(factor/2)-1)) {
+          mapvalue1 = waterLevel/(factor/2)-1;
         }
-        if (mapvalue2 < (waterLevel/(myFactor/2)-1)) {
-          mapvalue2 = waterLevel/(myFactor/2)-1;
+        if (mapvalue2 < (waterLevel/(factor/2)-1)) {
+          mapvalue2 = waterLevel/(factor/2)-1;
         }
-        if (mapvalue3 < (waterLevel/(myFactor/2)-1)) {
-          mapvalue3 = waterLevel/(myFactor/2)-1;
+        if (mapvalue3 < (waterLevel/(factor/2)-1)) {
+          mapvalue3 = waterLevel/(factor/2)-1;
         }
 
 
