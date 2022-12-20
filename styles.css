@@ -1,0 +1,25 @@
+input[type='range'] {
+  background-color: transparent;
+  height: 10px;
+}
+
+/** FF*/
+input[type="range"]::-moz-range-progress {
+  background-color: #0ec978;
+}
+input[type="range"]::-moz-range-track {  
+  background-color: #9a905d;
+}
+/* IE*/
+input[type="range"]::-ms-fill-lower {
+  background-color: #0ec978; 
+}
+input[type="range"]::-ms-fill-upper {  
+  background-color: #9a905d;
+}
+
+
+input[type='number'] {
+  margin-bottom: 5px;
+  margin-right: 10px;
+}

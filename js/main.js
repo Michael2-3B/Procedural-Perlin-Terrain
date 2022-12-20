@@ -25,23 +25,36 @@ function initializeRangeInput() {
   var scaleInput = document.getElementById('scale-input');
   var scaleValue = document.getElementById('scale-value');
 
+  var zoomInput = document.getElementById('zoom-input');
+  var zoomValue = document.getElementById('zoom-value');
+
   var beachInput = document.getElementById('beach-input');
   var beachValue = document.getElementById('beach-value');
 
   var lightInput = document.getElementById('light-input');
   var lightValue = document.getElementById('light-value');
 
+  var isoHeightInput = document.getElementById('iso-height-input');
+  var isoHeightValue = document.getElementById('iso-height-value');
+
   // Set the initial value of the span to the value of the range input
   persistenceValue.innerText = "Persistence: " + persistenceInput.value;
   octavesValue.innerText = "Octaves: " + octavesInput.value;
   wavelengthValue.innerText = "Wavelength: " + wavelengthInput.value;
   waterValue.innerText = "Water Level: " + waterLevel.value;
-  factorValue.innerText = "Factor: " + factorInput.value;
+  factorValue.innerText = "Max World Height: " + factorInput.value;
   exponentValue.innerText = "Exponent: " + exponentInput.value;
   peaksValue.innerText = "Peaks: " + peaksInput.value;
-  scaleValue.innerText = "Scale: " + scaleInput.value;
+  scaleValue.innerText = "Canvas Scale: " + scaleInput.value;
+  zoomValue.innerText = "Iso Zoom: " + zoomInput.value;
   beachValue.innerText = "Beach Size: " + beachInput.value;
   lightValue.innerText = "Light: " + lightInput.value;
+  isoHeightValue.innerText = "Iso Height: " + isoHeightInput.value;
+
+  isoHeightInput.addEventListener('input', function() {
+    isoHeightValue.innerHTML = "Iso Height: " + document.getElementById('iso-height-input').value;
+    generateMap();
+  });
 
   lightInput.addEventListener('input', function() {
     lightValue.innerHTML = "Light: " + document.getElementById('light-input').value;
@@ -75,7 +88,7 @@ function initializeRangeInput() {
   });
 
   factorInput.addEventListener('input', function() {
-    factorValue.innerHTML = "Factor: " + document.getElementById('factor-input').value;
+    factorValue.innerHTML = "Max World Height: " + document.getElementById('factor-input').value;
     generateMap();
   });
 
@@ -90,9 +103,14 @@ function initializeRangeInput() {
   });
 
   scaleInput.addEventListener('input', function() {
-    scaleValue.innerHTML = "Scale: " + document.getElementById('scale-input').value;
+    scaleValue.innerHTML = "Canvas Scale: " + document.getElementById('scale-input').value;
     document.getElementById('my-canvas').style.transformOrigin = 'top left';
     document.getElementById('my-canvas').style.transform = 'scale(' + document.getElementById('scale-input').value + ')';
+  });
+
+  zoomInput.addEventListener('input', function() {
+    zoomValue.innerHTML = "Iso Zoom: " + document.getElementById('zoom-input').value;
+    generateMap();
   });
 
   // Get a reference to the canvas element
@@ -195,6 +213,16 @@ function initializeRangeInput() {
 
 // Call the initializeRangeInput function when the page is loaded
 window.onload = initializeRangeInput;
+
+function resetAll() {
+  // Select the buttons using their class
+  const buttons = document.getElementsByClassName('reset');
+
+  // Iterate over the buttons and call the click method for each button
+  for (const button of buttons) {
+    button.click();
+  }
+}
 
 class SeedablePRNG {
   constructor(seed) {
@@ -317,13 +345,48 @@ function generateMap(){
   const waterLevel = document.getElementById('water-level').value;
   const beachSize = 1 + parseFloat(document.getElementById('beach-input').value);
   const light = parseInt(document.getElementById('light-input').value) - 255;
+  const zoom = 1 - parseFloat(document.getElementById('zoom-input').value);
+
+  function colorLookup(elevation) {
+    let color = Math.max(0, Math.min(254, Math.floor(Math.pow((elevation + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
+
+    let colors = new Array(3);
+
+    if (color < waterLevel/1.5) {
+      colors = [color, Math.min(color+44,255), Math.min(color+128,255)];
+    } else if (color < waterLevel) {
+      colors = [color, Math.min(color+88,255), 255];
+    } else if (color <  Math.min(Math.floor(waterLevel*beachSize),myFactor/(2-beachSize)-waterLevel)) {
+      colors = [Math.min(color+150,255), Math.min(color+100,255), color];
+    } else if (color < 100) {
+      colors = [color, color+88, color];
+    } else if (color < 130) {
+      colors = [color, color+58, color];
+    } else if (color < 160) {
+      colors = [color, Math.min(color+29), color];
+    } else if (color < 190) {
+      colors = [color, color, color];
+    } else if (color < 220) {
+      colors = [color+30, color+30, color+30];
+    } else {
+      colors = [Math.min(255,color+60), Math.min(255,color+60), Math.min(255,color+60)];
+    }
+
+    for(let i=0; i<3; i++){
+      colors[i] = Math.max(0,Math.min(255,colors[i]+light));
+    }
+
+    return colors;
+  }
 
   const map = perlinNoise(width, height, persistence, octaves, prng);
 
   // Generate a heatmap visualization of the Perlin noise values
 
   if (document.getElementById('checkbox').checked) {
-    const isoHeight = 20;  // adjust this value to control the height of the isometric view
+    const isoHeight = parseInt(document.getElementById('iso-height-input').value) / zoom;  // adjust this value to control the height of the isometric view
+    const isoWidth = zoom;   // adjust this value to control the width of the isometric view
+    const isoLength = zoom;  // adjust this value to control the length of the isometric view
 
     let minIsoX = Number.MAX_VALUE;
     let minIsoY = Number.MAX_VALUE;
@@ -333,8 +396,8 @@ function generateMap(){
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         // Calculate the isometric coordinates of the current point
-        const isoX = (x - y) * Math.cos(Math.PI / 6);
-        const isoY = (x + y) * Math.sin(Math.PI / 6) - map[x][y] * isoHeight;
+        const isoX = (x - y) * Math.cos(Math.PI / 6) / isoWidth;
+        const isoY = (x + y) * Math.sin(Math.PI / 6) / isoLength - map[x][y] * isoHeight;
 
         // Update the minimum and maximum x- and y-coordinates
         minIsoX = Math.min(minIsoX, isoX);
@@ -349,23 +412,25 @@ function generateMap(){
     const canvasHeight = Math.ceil(maxIsoY - minIsoY);
 
     // Set the size of the canvas
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    canvas.width = 173;
+    canvas.height = 150;
+
+    const ang = 6;
 
     // Translate the context so that the terrain is centered in the canvas
-    context.translate(Math.floor(canvasWidth / 6 - (minIsoX + maxIsoX)), Math.floor(canvasHeight / 10 - (minIsoY + maxIsoY) / 1.75));
+    context.translate(Math.floor((canvasWidth / 4.6486 - (minIsoX + maxIsoX)) * zoom), Math.floor((canvasHeight / (4.6486/zoom) - (minIsoY + maxIsoY) / 1.75)));
 
     for (let x = 0; x < width - 1; x++) {
       for (let y = 0; y < height - 1; y++) {
         // Calculate the isometric coordinates of the current point and its neighbors
-        const isoX1 = (x - y) * Math.cos(Math.PI / 6);
-        const isoY1 = (x + y) * Math.sin(Math.PI / 6) - Math.max((waterLevel/(myFactor/2))-1,map[x][y]) * isoHeight;
-        const isoX2 = (x + 1 - y) * Math.cos(Math.PI / 6);
-        const isoY2 = (x + 1 + y) * Math.sin(Math.PI / 6) - Math.max((waterLevel/(myFactor/2))-1,map[x + 1][y]) * isoHeight;
-        const isoX3 = (x - (y + 1)) * Math.cos(Math.PI / 6);
-        const isoY3 = (x + (y + 1)) * Math.sin(Math.PI / 6) - Math.max((waterLevel/(myFactor/2))-1,map[x][y + 1]) * isoHeight;
-        const isoX4 = (x + 1 - (y + 1)) * Math.cos(Math.PI / 6);
-        const isoY4 = (x + 1 + (y + 1)) * Math.sin(Math.PI / 6) - Math.max((waterLevel/(myFactor/2))-1,map[x + 1][y + 1]) * isoHeight;
+        const isoX1 = (x - y) * Math.cos(Math.PI / ang) / isoWidth;
+        const isoY1 = (x + y) * Math.sin(Math.PI / ang) / isoLength - Math.max((waterLevel/(myFactor/2))-1,map[x][y]) * isoHeight;
+        const isoX2 = (x + 1 - y) * Math.cos(Math.PI / ang) / isoWidth;
+        const isoY2 = (x + 1 + y) * Math.sin(Math.PI / ang) / isoLength - Math.max((waterLevel/(myFactor/2))-1,map[x + 1][y]) * isoHeight;
+        const isoX3 = (x - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
+        const isoY3 = (x + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - Math.max((waterLevel/(myFactor/2))-1,map[x][y + 1]) * isoHeight;
+        const isoX4 = (x + 1 - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
+        const isoY4 = (x + 1 + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - Math.max((waterLevel/(myFactor/2))-1,map[x + 1][y + 1]) * isoHeight;
 
         // Calculate the pixel coordinates of the isometric points
         const pixelX1 = Math.floor(isoX1 + width / 2);
@@ -378,68 +443,43 @@ function generateMap(){
         const pixelY4 = Math.floor(isoY4 + height / 2);
 
         // Calculate the color of the current point
-        const color1 = Math.max(0, Math.min(254, Math.floor(Math.pow((map[x][y] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
-        const color2 = Math.max(0, Math.min(254, Math.floor(Math.pow((map[x + 1][y] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
-        const color3 = Math.max(0, Math.min(254, Math.floor(Math.pow((map[x][y + 1] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
-        const color4 = Math.max(0, Math.min(254, Math.floor(Math.pow((map[x + 1][y + 1] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
-
-        // Set the fill style based on the color of the current point
-        context.fillStyle = getFillStyle(color1);
+        const color = colorLookup(map[x][y]);
 
         // Begin a new path and draw the polygon formed by the current point and its neighbors
+        context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]},1)`;
         context.beginPath();
         context.moveTo(pixelX1, pixelY1);
         context.lineTo(pixelX2, pixelY2);
         context.lineTo(pixelX4, pixelY4);
         context.lineTo(pixelX3, pixelY3);
+        context.closePath();
         context.fill();
 
         // Repeat the process for the other three points
-        context.fillStyle = getFillStyle(color2);
         context.beginPath();
         context.moveTo(pixelX2, pixelY2);
         context.lineTo(pixelX4, pixelY4);
-        context.lineTo(pixelX1, pixelY1);
         context.lineTo(pixelX3, pixelY3);
+        context.lineTo(pixelX1, pixelY1);
+        context.closePath();
         context.fill();
 
-        context.fillStyle = getFillStyle(color3);
         context.beginPath();
         context.moveTo(pixelX3, pixelY3);
         context.lineTo(pixelX1, pixelY1);
         context.lineTo(pixelX2, pixelY2);
         context.lineTo(pixelX4, pixelY4);
+        context.closePath();
         context.fill();
 
-        context.fillStyle = getFillStyle(color4);
         context.beginPath();
         context.moveTo(pixelX4, pixelY4);
-        context.lineTo(pixelX2, pixelY2);
         context.lineTo(pixelX3, pixelY3);
         context.lineTo(pixelX1, pixelY1);
+        context.lineTo(pixelX2, pixelY2);
+        context.closePath();
         context.fill();
-      }
-    }
-
-    function getFillStyle(color) {
-      if (color < waterLevel/1.5) {
-        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color + 88, 255)))})`;
-      } else if (color < waterLevel) {
-        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color+44,255)))}, ${Math.max(0,Math.min(255,light+Math.min(color + 128, 255)))})`;
-      } else if (color < Math.min(Math.floor(waterLevel*beachSize),myFactor/(2-beachSize)-waterLevel)) {
-        return `rgb(${Math.max(0,Math.min(255,light+Math.min(color + 150, 255)))}, ${Math.max(0,Math.min(255,light+Math.min(color + 100, 255)))}, ${Math.max(0,Math.min(255,light+color))})`;
-      } else if (color < 100) {
-        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color + 88, 255)))}, ${Math.max(0,Math.min(255,light+color))})`;
-      } else if (color < 130) {
-        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color + 58, 255)))}, ${Math.max(0,Math.min(255,light+color))})`;
-      } else if (color < 160) {
-        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color + 29, 255)))}, ${Math.max(0,Math.min(255,light+color))})`;
-      } else if (color < 190) {
-        return `rgb(${Math.max(0,Math.min(255,light+color - 30))}, ${Math.max(0,Math.min(255,light+color - 30))}, ${Math.max(0,Math.min(255,light+color - 30))})`;
-      } else if (color < 220) {
-        return `rgb(${Math.max(0,Math.min(255,light+color - 60))}, ${Math.max(0,Math.min(255,light+color - 60))}, ${Math.max(0,Math.min(255,light+color - 60))})`;
-      } else if (color < 255) {
-        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+color))})`;
+        
       }
     }
   } else {
@@ -449,57 +489,12 @@ function generateMap(){
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         const index = (x + y * width) * 4;
-        const color = Math.max(0,Math.min(254, Math.floor(Math.pow((map[x][y] + 1)/2 + parseFloat(myPeaks), myExponent) * myFactor)));
-        if (color < waterLevel/1.5) {
-          imageData.data[index] = color;
-          imageData.data[index + 1] = color;
-          imageData.data[index + 2] = Math.min(color+88,255);
-          imageData.data[index + 3] = 255;
-        } else if (color < waterLevel) {
-          imageData.data[index] = color;
-          imageData.data[index + 1] = Math.min(color+44,255);
-          imageData.data[index + 2] = Math.min(color+128,255);
-          imageData.data[index + 3] = 255;
-        } else if (color <  Math.min(Math.floor(waterLevel*beachSize),myFactor/(2-beachSize)-waterLevel)) {
-          imageData.data[index] = Math.min(color+150,255);
-          imageData.data[index + 1] = Math.min(color+100,255);
-          imageData.data[index + 2] = color;
-          imageData.data[index + 3] = 255;
-        } else if (color < 100) {
-          imageData.data[index] = color;
-          imageData.data[index + 1] = Math.min(color+88,255);
-          imageData.data[index + 2] = color;
-          imageData.data[index + 3] = 255;
-        } else if (color < 130) {
-          imageData.data[index] = color;
-          imageData.data[index + 1] = Math.min(color+58,255);
-          imageData.data[index + 2] = color;
-          imageData.data[index + 3] = 255;
-        } else if (color < 160) {
-          imageData.data[index] = color;
-          imageData.data[index + 1] = Math.min(color+29,255);
-          imageData.data[index + 2] = color;
-          imageData.data[index + 3] = 255;
-        } else if (color < 190) {
-          imageData.data[index] = color-30;
-          imageData.data[index + 1] = color-30;
-          imageData.data[index + 2] = color-30;
-          imageData.data[index + 3] = 255;
-        } else if (color < 220) {
-          imageData.data[index] = color-60;
-          imageData.data[index + 1] = color-60;
-          imageData.data[index + 2] = color-60;
-          imageData.data[index + 3] = 255;
-        } else if (color < 255) {
-          imageData.data[index] = color;
-          imageData.data[index + 1] = color;
-          imageData.data[index + 2] = color;
-          imageData.data[index + 3] = 255;
-        }
+        const color = colorLookup(map[x][y]);
 
-        imageData.data[index] = Math.max(0,Math.min(255,imageData.data[index]+light));
-        imageData.data[index+1] = Math.max(0,Math.min(255,imageData.data[index+1]+light));
-        imageData.data[index+2] = Math.max(0,Math.min(255,imageData.data[index+2]+light));
+        imageData.data[index] = color[0];
+        imageData.data[index + 1] = color[1];
+        imageData.data[index + 2] = color[2];
+        imageData.data[index + 3] = 255;
       }
     }
     context.putImageData(imageData, 0, 0);

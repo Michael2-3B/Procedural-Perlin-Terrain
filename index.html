@@ -2,30 +2,64 @@
 <html>
 <head>
   <title>Perlin Noise Terrain</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
   <script src="js/main.js"></script>
 </head>
 <body>
-  <div style="display: flex; flex-direction: row; margin-top: 50px;">
-    <div style="display: inline-block; margin-right:  10px;">
+  <div style="display: flex; flex-direction: row; margin-top: 25px;">
+
+    <div style="display: inline-block; margin-right:  10px; background-color: #eeeeee; padding: 10px;">
       <button onclick="document.getElementById('seed-input').value = Math.floor(Math.random()*999999999);generateMap()">Generate New Map</button><br><br>
+
       <span>Seed: </span><input type="number" id="seed-input" value="0" onchange="generateMap()"><br><br>
+
+      <button onclick="resetAll()">Reset All</button><br><br>
+
+      <button class="reset" onclick="document.getElementById('persistence-input').value = 1;document.getElementById('persistence-value').innerHTML = 'Persistence: 1';generateMap()">Reset</button>
       <input type="range" min="0" max="1" value="1" step=".01" id="persistence-input"><span id="persistence-value"></span><br>
+
+      <button class="reset" onclick="document.getElementById('octaves-input').value = 4;document.getElementById('octaves-value').innerHTML = 'Octaves: 4';generateMap()">Reset</button>
       <input type="range" min="0" max="6" value="4" id="octaves-input"><span id="octaves-value"></span><br>
+
+      <button class="reset" onclick="document.getElementById('wavelengths-input').value = 133;document.getElementById('wavelengths-value').innerHTML = 'Wavelength: 133';generateMap()">Reset</button>
       <input type="range" min="3" max="256" value="133" id="wavelength-input"><span id="wavelength-value"></span><br>
-      <input type="range" min="0" max="255" value="60" id="water-level"><span id="water-value"></span><br>
+
+      <button class="reset" onclick="document.getElementById('factor-input').value = 255;document.getElementById('factor-value').innerHTML = 'Max World Height: 255';generateMap()">Reset</button>
       <input type="range" min="1" max="255" value="255" id="factor-input"><span id="factor-value"></span><br>
+
+      <button class="reset" onclick="document.getElementById('exponent-input').value = 3;document.getElementById('exponent-value').innerHTML = 'Exponent: 3';generateMap()">Reset</button>
       <input type="range" min="0" max="10" value="3" step="0.05" id="exponent-input"><span id="exponent-value"></span><br>
-      <input type="range" min="0" max="1" value="0.2" step="0.01" id="peaks-input"><span id="peaks-value"></span><br>
+
+      <button class="reset" onclick="document.getElementById('peaks-input').value = 0.2;document.getElementById('peaks-value').innerHTML = 'Peaks: 0.2';generateMap()">Reset</button>
+      <input type="range" min="0" max="1" value="0.2" step="0.01" id="peaks-input"><span id="peaks-value"></span><br><br>
+
+      <button class="reset" onclick="document.getElementById('water-level').value = 60;document.getElementById('water-value').innerHTML = 'Water Level: 60';generateMap()">Reset</button>
+      <input type="range" min="0" max="255" value="60" id="water-level"><span id="water-value"></span><br>
+
+      <button class="reset" onclick="document.getElementById('beach-input').value = .2;document.getElementById('beach-value').innerHTML = 'Beach Size: .2';generateMap()">Reset</button>
       <input type="range" min="0" max="1" value=".2" step="0.01" id="beach-input"><span id="beach-value"></span><br>
-      <input type="range" min="0" max="255" value="255" id="light-input"><span id="light-value"></span><br>
-      <input type="range" min="1" max="16" value="5" id="scale-input"><span id="scale-value"></span><br><br>
+
+      <button class="reset" onclick="document.getElementById('light-input').value = 255;document.getElementById('light-value').innerHTML = 'Light: 255';generateMap()">Reset</button>
+      <input type="range" min="0" max="255" value="255" id="light-input"><span id="light-value"></span><br><br>
+
+      <button class="reset" onclick="document.getElementById('scale-input').value = 5;document.getElementById('scale-value').innerHTML = 'Canvas Scale: 5';document.getElementById('my-canvas').style.transformOrigin = 'top left';document.getElementById('my-canvas').style.transform = 'scale(' + document.getElementById('scale-input').value + ')';">Reset</button>
+      <input type="range" min="3" max="7" value="5" id="scale-input"><span id="scale-value"></span><br><br>
+
+      <button class="reset" onclick="document.getElementById('iso-height-input').value = 20;document.getElementById('iso-height-value').innerHTML = 'Iso Height: 20';generateMap()">Reset</button>
+      <input type="range" min="0" max="100" value="20" id="iso-height-input"><span id="iso-height-value"></span><br>
+
+      <button class="reset" onclick="document.getElementById('zoom-input').value = 0;document.getElementById('zoom-value').innerHTML = 'Iso Zoom: 0';generateMap()">Reset</button>
+      <input type="range" min="0" max="0.99" value="0" step="0.01" id="zoom-input"><span id="zoom-value"></span><br><br>
+
+      <input type="checkbox" id="checkbox" onchange="generateMap()"><span style="margin-left: 5px;">Toggle Isometric View</span><br><br>
       <span>Offset X: </span><input type="number" id="offset-x-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: ±29,999,984</span><br>
       <span>Offset Z: </span><input type="number" id="offset-z-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: ±29,999,984</span><br>
-      <input type="checkbox" id="checkbox" onchange="generateMap()"><span>Isometric View</span>
     </div>
+
     <div style="display: inline-block; margin-left: 10px;">
-      <canvas id="my-canvas" width="100" height="100" style="transform-origin: top left; transform: scale(5)"></canvas>
+      <canvas id="my-canvas" width="100" height="100" style="transform-origin: top left; transform: scale(5);"></canvas>
     </div>
+
   </div>
 </body>
 </html>
