@@ -28,6 +28,9 @@ function initializeRangeInput() {
   var beachInput = document.getElementById('beach-input');
   var beachValue = document.getElementById('beach-value');
 
+  var lightInput = document.getElementById('light-input');
+  var lightValue = document.getElementById('light-value');
+
   // Set the initial value of the span to the value of the range input
   persistenceValue.innerText = "Persistence: " + persistenceInput.value;
   octavesValue.innerText = "Octaves: " + octavesInput.value;
@@ -37,8 +40,13 @@ function initializeRangeInput() {
   exponentValue.innerText = "Exponent: " + exponentInput.value;
   peaksValue.innerText = "Peaks: " + peaksInput.value;
   scaleValue.innerText = "Scale: " + scaleInput.value;
-
   beachValue.innerText = "Beach Size: " + beachInput.value;
+  lightValue.innerText = "Light: " + lightInput.value;
+
+  lightInput.addEventListener('input', function() {
+    lightValue.innerHTML = "Light: " + document.getElementById('light-input').value;
+    generateMap();
+  });
 
   beachInput.addEventListener('input', function() {
     beachValue.innerHTML = "Beach Size: " + document.getElementById('beach-input').value;
@@ -205,6 +213,7 @@ function perlinNoise(width, height, persistence, octaves, prng) {
   const myExponent = document.getElementById('exponent-input').value;
   const myFactor = document.getElementById('factor-input').value;
   const myPeaks = document.getElementById('peaks-input').value;
+  const waterLevel = document.getElementById('water-level').value;
 
   const offsetX = document.getElementById('offset-x-input').value;
   const offsetZ = document.getElementById('offset-z-input').value;
@@ -307,6 +316,7 @@ function generateMap(){
   const myPeaks = document.getElementById('peaks-input').value;
   const waterLevel = document.getElementById('water-level').value;
   const beachSize = 1 + parseFloat(document.getElementById('beach-input').value);
+  const light = parseInt(document.getElementById('light-input').value);
 
   const map = perlinNoise(width, height, persistence, octaves, prng);
 
@@ -368,10 +378,10 @@ function generateMap(){
         const pixelY4 = Math.floor(isoY4 + height / 2);
 
         // Calculate the color of the current point
-        const color1 = Math.max(0, Math.min(Math.floor(Math.pow((map[x][y] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor), 255));
-        const color2 = Math.max(0, Math.min(Math.floor(Math.pow((map[x + 1][y] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor), 255));
-        const color3 = Math.max(0, Math.min(Math.floor(Math.pow((map[x][y + 1] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor), 255));
-        const color4 = Math.max(0, Math.min(Math.floor(Math.pow((map[x + 1][y + 1] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor), 255));
+        const color1 = Math.max(0, Math.min(254, Math.floor(Math.pow((map[x][y] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
+        const color2 = Math.max(0, Math.min(254, Math.floor(Math.pow((map[x + 1][y] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
+        const color3 = Math.max(0, Math.min(254, Math.floor(Math.pow((map[x][y + 1] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
+        const color4 = Math.max(0, Math.min(254, Math.floor(Math.pow((map[x + 1][y + 1] + 1) / 2 + parseFloat(myPeaks), myExponent) * myFactor)));
 
         // Set the fill style based on the color of the current point
         context.fillStyle = getFillStyle(color1);
@@ -413,23 +423,23 @@ function generateMap(){
 
     function getFillStyle(color) {
       if (color < waterLevel/1.5) {
-        return `rgb(${color}, ${color}, ${Math.min(color + 88, 255)})`;
+        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color + 88, 255)))})`;
       } else if (color < waterLevel) {
-        return `rgb(${color}, ${Math.min(color+44,255)}, ${Math.min(color + 128, 255)})`;
+        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color+44,255)))}, ${Math.max(0,Math.min(255,light+Math.min(color + 128, 255)))})`;
       } else if (color < Math.min(Math.floor(waterLevel*beachSize),myFactor/(2-beachSize)-waterLevel)) {
-        return `rgb(${Math.min(color + 150, 255)}, ${Math.min(color + 100, 255)}, ${color})`;
+        return `rgb(${Math.max(0,Math.min(255,light+Math.min(color + 150, 255)))}, ${Math.max(0,Math.min(255,light+Math.min(color + 100, 255)))}, ${Math.max(0,Math.min(255,light+color))})`;
       } else if (color < 100) {
-        return `rgb(${color}, ${Math.min(color + 88, 255)}, ${color})`;
+        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color + 88, 255)))}, ${Math.max(0,Math.min(255,light+color))})`;
       } else if (color < 130) {
-        return `rgb(${color}, ${Math.min(color + 58, 255)}, ${color})`;
+        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color + 58, 255)))}, ${Math.max(0,Math.min(255,light+color))})`;
       } else if (color < 160) {
-        return `rgb(${color}, ${Math.min(color + 29, 255)}, ${color})`;
+        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+Math.min(color + 29, 255)))}, ${Math.max(0,Math.min(255,light+color))})`;
       } else if (color < 190) {
-        return `rgb(${color - 30}, ${color - 30}, ${color - 30})`;
+        return `rgb(${Math.max(0,Math.min(255,light+color - 30))}, ${Math.max(0,Math.min(255,light+color - 30))}, ${Math.max(0,Math.min(255,light+color - 30))})`;
       } else if (color < 220) {
-        return `rgb(${color - 60}, ${color - 60}, ${color - 60})`;
+        return `rgb(${Math.max(0,Math.min(255,light+color - 60))}, ${Math.max(0,Math.min(255,light+color - 60))}, ${Math.max(0,Math.min(255,light+color - 60))})`;
       } else if (color < 255) {
-        return `rgb(${color}, ${color}, ${color})`;
+        return `rgb(${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+color))}, ${Math.max(0,Math.min(255,light+color))})`;
       }
     }
   } else {
@@ -439,7 +449,7 @@ function generateMap(){
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         const index = (x + y * width) * 4;
-        const color = Math.max(0,Math.min(Math.floor(Math.pow((map[x][y] + 1)/2 + parseFloat(myPeaks), myExponent) * myFactor),255));
+        const color = Math.max(0,Math.min(254, Math.floor(Math.pow((map[x][y] + 1)/2 + parseFloat(myPeaks), myExponent) * myFactor)));
         if (color < waterLevel/1.5) {
           imageData.data[index] = color;
           imageData.data[index + 1] = color;
@@ -486,6 +496,10 @@ function generateMap(){
           imageData.data[index + 2] = color;
           imageData.data[index + 3] = 255;
         }
+
+        imageData.data[index] = Math.max(0,Math.min(255,imageData.data[index]+light));
+        imageData.data[index+1] = Math.max(0,Math.min(255,imageData.data[index+1]+light));
+        imageData.data[index+2] = Math.max(0,Math.min(255,imageData.data[index+2]+light));
       }
     }
     context.putImageData(imageData, 0, 0);
