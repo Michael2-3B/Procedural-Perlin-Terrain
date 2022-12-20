@@ -42,7 +42,7 @@ function initializeRangeInput() {
   octavesValue.innerText = "Octaves: " + octavesInput.value;
   wavelengthValue.innerText = "Wavelength: " + wavelengthInput.value;
   waterValue.innerText = "Water Level: " + waterLevel.value;
-  factorValue.innerText = "Max World Height: " + factorInput.value;
+  factorValue.innerText = "Factor: " + factorInput.value;
   exponentValue.innerText = "Exponent: " + exponentInput.value;
   peaksValue.innerText = "Peaks: " + peaksInput.value;
   scaleValue.innerText = "Canvas Scale: " + scaleInput.value;
@@ -88,7 +88,7 @@ function initializeRangeInput() {
   });
 
   factorInput.addEventListener('input', function() {
-    factorValue.innerHTML = "Max World Height: " + document.getElementById('factor-input').value;
+    factorValue.innerHTML = "Factor: " + document.getElementById('factor-input').value;
     generateMap();
   });
 
@@ -224,6 +224,34 @@ function resetAll() {
   }
 }
 
+function randomizeInputs() {
+  document.getElementById('persistence-input').value = 1;
+  document.getElementById('persistence-value').innerHTML = "Persistence: " + 1;
+
+  document.getElementById('octaves-input').value = 5;
+  document.getElementById('octaves-value').innerHTML = "Octaves: " + 5;
+
+  document.getElementById('wavelength-input').value = 133
+  document.getElementById('wavelength-value').innerHTML = "Wavelength: " + 133;
+
+  document.getElementById('factor-input').value = 255;
+  document.getElementById('factor-value').innerHTML = "Factor: " + 255;
+
+  document.getElementById('exponent-input').value = parseFloat(.1+.05*Math.floor(Math.random()*199));
+  document.getElementById('exponent-value').innerHTML = "Exponent: " + document.getElementById('exponent-input').value;
+
+  document.getElementById('peaks-input').value = parseFloat(.01*Math.floor(Math.random()*51));
+  document.getElementById('peaks-value').innerHTML = "Peaks: " + document.getElementById('peaks-input').value;
+
+  document.getElementById('water-level').value = Math.floor(Math.random()*256);
+  document.getElementById('water-value').innerHTML = "Water Level: " + document.getElementById('water-level').value;
+
+  document.getElementById('beach-input').value = parseFloat(.01*Math.floor(Math.random()*101));
+  document.getElementById('beach-value').innerHTML = "Beach Size: " + document.getElementById('beach-input').value;
+
+  generateMap();
+}
+
 class SeedablePRNG {
   constructor(seed) {
     this.seed = seed;
@@ -354,6 +382,8 @@ function generateMap(){
 
     if (color < waterLevel/1.5) {
       colors = [color, Math.min(color+44,255), Math.min(color+128,255)];
+    } else if (color < waterLevel/1.25) {
+      colors = [color, Math.min(color+66,255), Math.min(color+192,255)];
     } else if (color < waterLevel) {
       colors = [color, Math.min(color+88,255), 255];
     } else if (color <  Math.min(Math.floor(waterLevel*beachSize),myFactor/(2-beachSize)-waterLevel)) {
@@ -365,11 +395,11 @@ function generateMap(){
     } else if (color < 160) {
       colors = [color, Math.min(color+29), color];
     } else if (color < 190) {
-      colors = [color, color, color];
+      colors = [color-10,color-10,color];
     } else if (color < 220) {
-      colors = [color+30, color+30, color+30];
+      colors = [color-40,color-40,color-30];
     } else {
-      colors = [Math.min(255,color+60), Math.min(255,color+60), Math.min(255,color+60)];
+      colors = [Math.min(255,color+10), Math.min(255,color+10), Math.min(255,color+20)];
     }
 
     for(let i=0; i<3; i++){
@@ -418,19 +448,39 @@ function generateMap(){
     const ang = 6;
 
     // Translate the context so that the terrain is centered in the canvas
-    context.translate(Math.floor((canvasWidth / 4.6486 - (minIsoX + maxIsoX)) * zoom), Math.floor((canvasHeight / (4.6486/zoom) - (minIsoY + maxIsoY) / 1.75)));
+    context.translate(Math.floor((canvasWidth / 4.6486 - (minIsoX + maxIsoX)) * zoom), Math.floor((canvasHeight / 4.6486 - (minIsoY + maxIsoY) / 1.4)) + 20);
 
     for (let x = 0; x < width - 1; x++) {
       for (let y = 0; y < height - 1; y++) {
+
+        let mapvalue = map[x][y];
+        let mapvalue1 = map[x+1][y];
+        let mapvalue2 = map[x][y+1];
+        let mapvalue3 = map[x+1][y+1];
+
+        if (mapvalue < (waterLevel/(myFactor/2)-1)) {
+          mapvalue = waterLevel/(myFactor/2)-1;
+        }
+        if (mapvalue1 < (waterLevel/(myFactor/2)-1)) {
+          mapvalue1 = waterLevel/(myFactor/2)-1;
+        }
+        if (mapvalue2 < (waterLevel/(myFactor/2)-1)) {
+          mapvalue2 = waterLevel/(myFactor/2)-1;
+        }
+        if (mapvalue3 < (waterLevel/(myFactor/2)-1)) {
+          mapvalue3 = waterLevel/(myFactor/2)-1;
+        }
+
+
         // Calculate the isometric coordinates of the current point and its neighbors
         const isoX1 = (x - y) * Math.cos(Math.PI / ang) / isoWidth;
-        const isoY1 = (x + y) * Math.sin(Math.PI / ang) / isoLength - Math.max((waterLevel/(myFactor/2))-1,map[x][y]) * isoHeight;
+        const isoY1 = (x + y) * Math.sin(Math.PI / ang) / isoLength - mapvalue * isoHeight;
         const isoX2 = (x + 1 - y) * Math.cos(Math.PI / ang) / isoWidth;
-        const isoY2 = (x + 1 + y) * Math.sin(Math.PI / ang) / isoLength - Math.max((waterLevel/(myFactor/2))-1,map[x + 1][y]) * isoHeight;
+        const isoY2 = (x + 1 + y) * Math.sin(Math.PI / ang) / isoLength - mapvalue1 * isoHeight;
         const isoX3 = (x - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
-        const isoY3 = (x + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - Math.max((waterLevel/(myFactor/2))-1,map[x][y + 1]) * isoHeight;
+        const isoY3 = (x + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - mapvalue2 * isoHeight;
         const isoX4 = (x + 1 - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
-        const isoY4 = (x + 1 + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - Math.max((waterLevel/(myFactor/2))-1,map[x + 1][y + 1]) * isoHeight;
+        const isoY4 = (x + 1 + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - mapvalue3 * isoHeight;
 
         // Calculate the pixel coordinates of the isometric points
         const pixelX1 = Math.floor(isoX1 + width / 2);
