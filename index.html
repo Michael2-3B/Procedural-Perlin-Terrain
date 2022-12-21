@@ -9,11 +9,16 @@
   <div style="display: flex; flex-direction: row; margin-top: 25px;">
 
     <div style="display: inline-block; margin-right: 10px; width: 400px; background-color: #eeeeee; padding: 10px;">
-      <button onclick="document.getElementById('seed-input').value = Math.floor(Math.random()*999999999);generateMap()">Generate Random Seed</button><br><br>
+      <button style="margin-bottom: 10px;" onclick="document.getElementById('seed-input').value = Math.floor(Math.random()*999999999);generateMap()">Generate Random Seed</button><br>
 
-      <span>Seed: </span><input type="number" id="seed-input" value="0" onchange="generateMap()"><br><br>
+      <span>Seed: </span><input type="number" id="seed-input" min="0" value="0" onchange="generateMap()"><br><br>
 
-      <button onclick="resetAll()" style="margin-right: 10px;">Reset All</button><br><br>
+      <span>Offset X: </span><input type="number" id="offset-x-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: ±29,999,984</span><br>
+      <span>Offset Z: </span><input type="number" id="offset-z-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: ±29,999,984</span><br><br>
+      <span id="coordX">Coord X:</span><br>
+      <span id="coordZ">Coord Z:</span><br><br>
+
+      <button onclick="resetAll()" style="margin-bottom: 10px;">Reset All</button><br>
 
       <b>Noise Map Values:</b><br>
       <button class="reset" onclick="document.getElementById('persistence-input').value = 1;document.getElementById('persistence-value').innerHTML = 'Persistence: 1';generateMap()">Reset</button>
@@ -47,9 +52,6 @@
       <input type="range" min="3" max="7" value="5" id="scale-input"><span id="scale-value"></span><br><br>
 
       <b>Isometric Display:</b><br>
-      <button class="reset" onclick="document.getElementById('iso-height-input').value = 20;document.getElementById('iso-height-value').innerHTML = 'Iso Height: 20';generateMap()">Reset</button>
-      <input type="range" min="0" max="100" value="20" id="iso-height-input"><span id="iso-height-value"></span><br>
-
       <button class="reset" onclick="document.getElementById('zoom-input').value = 0;document.getElementById('zoom-value').innerHTML = 'Iso Zoom: 0';generateMap()">Reset</button>
       <input type="range" min="0" max="0.99" value="0" step="0.01" id="zoom-input"><span id="zoom-value"></span><br>
 
@@ -58,9 +60,6 @@
 
       <input type="checkbox" id="checkbox" onchange="generateMap()"><span style="margin-left: 5px;">Toggle Isometric View</span><br>
       <input type="checkbox" id="blockRendering" onchange="generateMap()"><span style="margin-left: 5px;">Toggle Isometric Blocks</span><br><br>
-
-      <span>Offset X: </span><input type="number" id="offset-x-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: ±29,999,984</span><br>
-      <span>Offset Z: </span><input type="number" id="offset-z-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: ±29,999,984</span><br>
     </div>
 
     <div style="display: inline-block; margin-left: 10px;">

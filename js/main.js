@@ -1,4 +1,5 @@
 const factor = 255;
+const worldBorder = 29999984;
 
 // Define a function to initialize the range input and span
 function initializeRangeInput() {
@@ -33,9 +34,6 @@ function initializeRangeInput() {
   var lightInput = document.getElementById('light-input');
   var lightValue = document.getElementById('light-value');
 
-  var isoHeightInput = document.getElementById('iso-height-input');
-  var isoHeightValue = document.getElementById('iso-height-value');
-
   var lightPositionInput = document.getElementById('light-position');
   var lightPositionValue = document.getElementById('light-position-value');
 
@@ -50,16 +48,10 @@ function initializeRangeInput() {
   zoomValue.innerText = "Iso Zoom: " + zoomInput.value;
   beachValue.innerText = "Beach Size: " + beachInput.value;
   lightValue.innerText = "World Light: " + lightInput.value;
-  isoHeightValue.innerText = "Iso Height: " + isoHeightInput.value;
   lightPositionValue.innerText = "Block Light Position: " + lightPositionInput.value;
 
   lightPositionInput.addEventListener('input', function() {
     lightPositionValue.innerHTML = "Block Light Position: " + document.getElementById('light-position').value;
-    generateMap();
-  });
-
-  isoHeightInput.addEventListener('input', function() {
-    isoHeightValue.innerHTML = "Iso Height: " + document.getElementById('iso-height-input').value;
     generateMap();
   });
 
@@ -135,6 +127,8 @@ function initializeRangeInput() {
   canvas.addEventListener("mouseleave", function(event) {
     canvas.style.cursor = "default";
     isMouseDown = false;
+    document.getElementById('coordX').innerHTML = "Coord X:";
+    document.getElementById('coordZ').innerHTML = "Coord Z:";
   });
 
   // Add event listeners for the mousedown, mousemove, and mouseup events
@@ -147,6 +141,22 @@ function initializeRangeInput() {
   });
 
   canvas.addEventListener("mousemove", function(event) {
+
+    if (document.getElementById('checkbox').checked) {
+
+      document.getElementById('coordX').innerHTML = "Coord X: i dunno";
+      document.getElementById('coordZ').innerHTML = "Coord Z: math is hard";
+
+    } else {
+
+      let x = event.offsetX + parseInt(document.getElementById('offset-x-input').value);
+      let y = event.offsetY + parseInt(document.getElementById('offset-z-input').value);
+
+      document.getElementById('coordX').innerHTML = "Coord X: " + x;
+      document.getElementById('coordZ').innerHTML = "Coord Z: " + y;
+      
+    }
+
     // If the mouse button is being held down, update the offset values based on the change in mouse position
     if (isMouseDown) {
       if (document.getElementById('checkbox').checked){
@@ -184,8 +194,8 @@ function initializeRangeInput() {
         currentY = event.offsetY;
       }
 
-      document.getElementById('offset-x-input').value = Math.max(-29999984,Math.min(parseInt(document.getElementById('offset-x-input').value),29999984));
-      document.getElementById('offset-z-input').value = Math.max(-29999984,Math.min(parseInt(document.getElementById('offset-z-input').value),29999984));
+      document.getElementById('offset-x-input').value = Math.max(-worldBorder,Math.min(parseInt(document.getElementById('offset-x-input').value),worldBorder));
+      document.getElementById('offset-z-input').value = Math.max(-worldBorder,Math.min(parseInt(document.getElementById('offset-z-input').value),worldBorder));
 
       generateMap();
     }
@@ -280,8 +290,8 @@ function perlinNoise(width, height, persistence, octaves, wavelengthValue, prng)
       // Initialize the Perlin noise value to 0
       noise[x][y] = 0;
 
-      let k = x+parseInt(offsetX)+29999984;
-      let j = y+parseInt(offsetZ)+29999984;
+      let k = x+parseInt(offsetX)+worldBorder;
+      let j = y+parseInt(offsetZ)+worldBorder;
 
       // Calculate the wavelength and amplitude for each octave
       for (let o = 0, wavelength = wavelengthValue; o < octaves; o++) {
@@ -336,9 +346,14 @@ function lerp(a, b, t) {
 
 function generateMap(){
 
-  console.clear();
-
   let worldSeed = document.getElementById('seed-input').value;
+  if (worldSeed < 0){
+    worldSeed = 0;
+    document.getElementById('seed-input').value = 0;
+  }
+
+  document.getElementById('offset-x-input').value = Math.max(-worldBorder,Math.min(worldBorder, document.getElementById('offset-x-input').value));
+  document.getElementById('offset-z-input').value = Math.max(-worldBorder,Math.min(worldBorder, document.getElementById('offset-z-input').value));
 
   const prng = new SeedablePRNG(worldSeed);
 
@@ -397,38 +412,15 @@ function generateMap(){
 
   const map = perlinNoise(width, height, persistence, octaves, wavelength, prng);
 
-  // Generate a heatmap visualization of the Perlin noise values
+  // Generate a height map visualization of the Perlin noise values
 
   if (document.getElementById('checkbox').checked) {
-    const isoHeight = parseInt(document.getElementById('iso-height-input').value) / zoom;  // adjust this value to control the height of the isometric view
+    const isoHeight = 20 / zoom;  // adjust this value to control the height of the isometric view
     const isoWidth = zoom;   // adjust this value to control the width of the isometric view
     const isoLength = zoom;  // adjust this value to control the length of the isometric view
 
     const lightPosition = parseInt(document.getElementById('light-position').value);
     const lightOffset = 30;
-
-    let minIsoX = Number.MAX_VALUE;
-    let minIsoY = Number.MAX_VALUE;
-    let maxIsoX = Number.MIN_VALUE;
-    let maxIsoY = Number.MIN_VALUE;
-
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        // Calculate the isometric coordinates of the current point
-        const isoX = (x - y) * Math.cos(Math.PI / 6) / isoWidth;
-        const isoY = (x + y) * Math.sin(Math.PI / 6) / isoLength - map[x][y] * isoHeight;
-
-        // Update the minimum and maximum x- and y-coordinates
-        minIsoX = Math.min(minIsoX, isoX);
-        minIsoY = Math.min(minIsoY, isoY);
-        maxIsoX = Math.max(maxIsoX, isoX);
-        maxIsoY = Math.max(maxIsoY, isoY);
-      }
-    }
-
-    // Calculate the size of the canvas based on the minimum and maximum coordinates
-    const canvasWidth = Math.ceil(maxIsoX - minIsoX);
-    const canvasHeight = Math.ceil(maxIsoY - minIsoY);
 
     // Set the size of the canvas
     canvas.width = 173;
@@ -437,7 +429,7 @@ function generateMap(){
     const ang = 6;
 
     // Translate the context so that the terrain is centered in the canvas
-    context.translate(Math.floor((canvasWidth / 4.6486 - (minIsoX + maxIsoX)) * zoom), Math.floor((canvasHeight / 4.6486 - (minIsoY + maxIsoY) / 1.4)) + 20);
+    context.translate(37,-37/zoom+17);
 
     for (let y = 0; y < height - 1; y++) {
       for (let x = 0; x < width - 1; x++) {
