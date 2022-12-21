@@ -233,7 +233,7 @@ function randomizeInputs() {
   document.getElementById('peaks-input').value = parseFloat(.01*Math.floor(Math.random()*51));
   document.getElementById('peaks-value').innerHTML = "Peaks: " + document.getElementById('peaks-input').value;
 
-  document.getElementById('water-level').value = Math.floor(Math.random()*256);
+  document.getElementById('water-level').value = Math.floor(Math.random()*128);
   document.getElementById('water-value').innerHTML = "Water Level: " + document.getElementById('water-level').value;
 
   document.getElementById('beach-input').value = parseFloat(.01*Math.floor(Math.random()*101));
