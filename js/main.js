@@ -447,6 +447,7 @@ function generateMap(){
         let mapvalue2 = map[x][y+1];
         let mapvalue3 = map[x+1][y+1];
 
+        /*
         if (mapvalue < (waterLevel/(factor/2)-1)) {
           mapvalue = waterLevel/(factor/2)-1;
         }
@@ -459,6 +460,7 @@ function generateMap(){
         if (mapvalue3 < (waterLevel/(factor/2)-1)) {
           mapvalue3 = waterLevel/(factor/2)-1;
         }
+        */
 
         if (document.getElementById('blockRendering').checked) {
 
