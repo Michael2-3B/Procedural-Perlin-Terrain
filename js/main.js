@@ -36,6 +36,9 @@ function initializeRangeInput() {
   var isoHeightInput = document.getElementById('iso-height-input');
   var isoHeightValue = document.getElementById('iso-height-value');
 
+  var lightPositionInput = document.getElementById('light-position');
+  var lightPositionValue = document.getElementById('light-position-value');
+
   // Set the initial value of the span to the value of the range input
   persistenceValue.innerText = "Persistence: " + persistenceInput.value;
   octavesValue.innerText = "Octaves: " + octavesInput.value;
@@ -48,6 +51,12 @@ function initializeRangeInput() {
   beachValue.innerText = "Beach Size: " + beachInput.value;
   lightValue.innerText = "World Light: " + lightInput.value;
   isoHeightValue.innerText = "Iso Height: " + isoHeightInput.value;
+  lightPositionValue.innerText = "Block Light Position: " + lightPositionInput.value;
+
+  lightPositionInput.addEventListener('input', function() {
+    lightPositionValue.innerHTML = "Block Light Position: " + document.getElementById('light-position').value;
+    generateMap();
+  });
 
   isoHeightInput.addEventListener('input', function() {
     isoHeightValue.innerHTML = "Iso Height: " + document.getElementById('iso-height-input').value;
@@ -327,6 +336,8 @@ function lerp(a, b, t) {
 
 function generateMap(){
 
+  console.clear();
+
   let worldSeed = document.getElementById('seed-input').value;
 
   const prng = new SeedablePRNG(worldSeed);
@@ -393,6 +404,9 @@ function generateMap(){
     const isoWidth = zoom;   // adjust this value to control the width of the isometric view
     const isoLength = zoom;  // adjust this value to control the length of the isometric view
 
+    const lightPosition = parseInt(document.getElementById('light-position').value);
+    const lightOffset = 30;
+
     let minIsoX = Number.MAX_VALUE;
     let minIsoY = Number.MAX_VALUE;
     let maxIsoX = Number.MIN_VALUE;
@@ -425,8 +439,8 @@ function generateMap(){
     // Translate the context so that the terrain is centered in the canvas
     context.translate(Math.floor((canvasWidth / 4.6486 - (minIsoX + maxIsoX)) * zoom), Math.floor((canvasHeight / 4.6486 - (minIsoY + maxIsoY) / 1.4)) + 20);
 
-    for (let x = 0; x < width - 1; x++) {
-      for (let y = 0; y < height - 1; y++) {
+    for (let y = 0; y < height - 1; y++) {
+      for (let x = 0; x < width - 1; x++) {
 
         let mapvalue = map[x][y];
         let mapvalue1 = map[x+1][y];
@@ -446,64 +460,133 @@ function generateMap(){
           mapvalue3 = waterLevel/(factor/2)-1;
         }
 
+        if (document.getElementById('blockRendering').checked) {
 
-        // Calculate the isometric coordinates of the current point and its neighbors
-        const isoX1 = (x - y) * Math.cos(Math.PI / ang) / isoWidth;
-        const isoY1 = (x + y) * Math.sin(Math.PI / ang) / isoLength - mapvalue * isoHeight;
-        const isoX2 = (x + 1 - y) * Math.cos(Math.PI / ang) / isoWidth;
-        const isoY2 = (x + 1 + y) * Math.sin(Math.PI / ang) / isoLength - mapvalue1 * isoHeight;
-        const isoX3 = (x - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
-        const isoY3 = (x + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - mapvalue2 * isoHeight;
-        const isoX4 = (x + 1 - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
-        const isoY4 = (x + 1 + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - mapvalue3 * isoHeight;
+          //Draw blocks
 
-        // Calculate the pixel coordinates of the isometric points
-        const pixelX1 = Math.floor(isoX1 + width / 2);
-        const pixelY1 = Math.floor(isoY1 + height / 2);
-        const pixelX2 = Math.floor(isoX2 + width / 2);
-        const pixelY2 = Math.floor(isoY2 + height / 2);
-        const pixelX3 = Math.floor(isoX3 + width / 2);
-        const pixelY3 = Math.floor(isoY3 + height / 2);
-        const pixelX4 = Math.floor(isoX4 + width / 2);
-        const pixelY4 = Math.floor(isoY4 + height / 2);
+          let blockSize = 1/(Math.max(1,isoHeight)*zoom);
+          let blockHeight = (mapvalue + mapvalue1 + mapvalue2 + mapvalue3) / 4;
 
-        // Calculate the color of the current point
-        const color = colorLookup(map[x][y]);
+          // Calculate the remainder of blockHeight divided by blockSize
+          let remainder = blockHeight % blockSize;
 
-        // Begin a new path and draw the polygon formed by the current point and its neighbors
-        context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]},1)`;
-        context.beginPath();
-        context.moveTo(pixelX1, pixelY1);
-        context.lineTo(pixelX2, pixelY2);
-        context.lineTo(pixelX4, pixelY4);
-        context.lineTo(pixelX3, pixelY3);
-        context.closePath();
-        context.fill();
+          // If the remainder is not equal to 0, add the difference to blockHeight to make it a multiple of blockSize
+          if (remainder !== 0) {
+            blockHeight += (blockSize - remainder);
+          }
 
-        // Repeat the process for the other three points
-        context.beginPath();
-        context.moveTo(pixelX2, pixelY2);
-        context.lineTo(pixelX4, pixelY4);
-        context.lineTo(pixelX3, pixelY3);
-        context.lineTo(pixelX1, pixelY1);
-        context.closePath();
-        context.fill();
+          const isoX1 = (x-y) * Math.cos(Math.PI/ang) / isoWidth;
+          const isoY1 = (x+y) * Math.sin(Math.PI/ang) / isoLength - (blockHeight + blockSize) * isoHeight;
 
-        context.beginPath();
-        context.moveTo(pixelX3, pixelY3);
-        context.lineTo(pixelX1, pixelY1);
-        context.lineTo(pixelX2, pixelY2);
-        context.lineTo(pixelX4, pixelY4);
-        context.closePath();
-        context.fill();
+          const isoX2 = (x + 1 - y) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY2 = (x + 1 + y) * Math.sin(Math.PI / ang) / isoLength - (blockHeight + blockSize) * isoHeight;
 
-        context.beginPath();
-        context.moveTo(pixelX4, pixelY4);
-        context.lineTo(pixelX3, pixelY3);
-        context.lineTo(pixelX1, pixelY1);
-        context.lineTo(pixelX2, pixelY2);
-        context.closePath();
-        context.fill();
+          const isoX3 = (x - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY3 = (x + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - (blockHeight + blockSize) * isoHeight;
+
+          const isoX4 = (x + 1 - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY4 = (x + 1 + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - (blockHeight + blockSize) * isoHeight;
+
+          const isoX5 = (x - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY5 = (x + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - (blockHeight - blockSize) * isoHeight;
+
+          const isoX6 = (x + 1 - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY6 = (x + 1 + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - (blockHeight - blockSize) * isoHeight;
+
+          const isoX7 = (x + 1 - y) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY7 = (x + 1 + y) * Math.sin(Math.PI / ang) / isoLength - (blockHeight - blockSize) * isoHeight;
+
+          const pixelX1 = Math.floor(isoX1 + width / 2);
+          const pixelY1 = Math.floor(isoY1 + height / 2);
+          const pixelX2 = Math.floor(isoX2 + width / 2);
+          const pixelY2 = Math.floor(isoY2 + height / 2);
+          const pixelX3 = Math.floor(isoX3 + width / 2);
+          const pixelY3 = Math.floor(isoY3 + height / 2);
+          const pixelX4 = Math.floor(isoX4 + width / 2);
+          const pixelY4 = Math.floor(isoY4 + height / 2);
+          const pixelX5 = Math.floor(isoX5 + width / 2);
+          const pixelY5 = Math.floor(isoY5 + height / 2);
+          const pixelX6 = Math.floor(isoX6 + width / 2);
+          const pixelY6 = Math.floor(isoY6 + height / 2);
+          const pixelX7 = Math.floor(isoX7 + width / 2);
+          const pixelY7 = Math.floor(isoY7 + height / 2);
+
+          const color = colorLookup(blockHeight);
+
+          //Draw Left Face
+          context.fillStyle = `rgba(${Math.min(255,Math.max(0,color[0]-lightOffset-lightPosition))}, ${Math.min(255,Math.max(0,color[1]-lightOffset-lightPosition))}, ${Math.min(255,Math.max(0,color[2]-lightOffset-lightPosition))},1)`;
+          context.strokeStyle = context.fillStyle;
+          context.beginPath();
+          context.moveTo(pixelX3, pixelY3);
+          context.lineTo(pixelX4, pixelY4);
+          context.lineTo(pixelX6, pixelY6);
+          context.lineTo(pixelX5, pixelY5);
+          context.stroke();
+          context.fill();
+
+          //Draw Right Face
+          context.fillStyle = `rgba(${Math.min(255,Math.max(0,color[0]-lightOffset+lightPosition))}, ${Math.min(255,Math.max(0,color[1]-lightOffset+lightPosition))}, ${Math.min(255,Math.max(0,color[2]-lightOffset+lightPosition))},1)`;
+          context.strokeStyle = context.fillStyle;
+          context.beginPath();
+          context.moveTo(pixelX4, pixelY4);
+          context.lineTo(pixelX2, pixelY2);
+          context.lineTo(pixelX7, pixelY7);
+          context.lineTo(pixelX6, pixelY6);
+          context.stroke();
+          context.fill();
+
+          //Draw Top Face
+          context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]},1)`;
+          context.strokeStyle = context.fillStyle;
+          context.beginPath();
+          context.moveTo(pixelX1, pixelY1);
+          context.lineTo(pixelX2, pixelY2);
+          context.lineTo(pixelX4, pixelY4);
+          context.stroke();
+          context.lineTo(pixelX3, pixelY3);
+          context.stroke();
+          context.fill();
+
+        } else {
+
+          //Draw tiles
+
+          // Calculate the isometric coordinates of the current point and its neighbors
+          const isoX1 = (x - y) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY1 = (x + y) * Math.sin(Math.PI / ang) / isoLength - mapvalue * isoHeight;
+          const isoX2 = (x + 1 - y) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY2 = (x + 1 + y) * Math.sin(Math.PI / ang) / isoLength - mapvalue1 * isoHeight;
+          const isoX3 = (x - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY3 = (x + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - mapvalue2 * isoHeight;
+          const isoX4 = (x + 1 - (y + 1)) * Math.cos(Math.PI / ang) / isoWidth;
+          const isoY4 = (x + 1 + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - mapvalue3 * isoHeight;
+
+          // Calculate the pixel coordinates of the isometric points
+          const pixelX1 = Math.floor(isoX1 + width / 2);
+          const pixelY1 = Math.floor(isoY1 + height / 2);
+          const pixelX2 = Math.floor(isoX2 + width / 2);
+          const pixelY2 = Math.floor(isoY2 + height / 2);
+          const pixelX3 = Math.floor(isoX3 + width / 2);
+          const pixelY3 = Math.floor(isoY3 + height / 2);
+          const pixelX4 = Math.floor(isoX4 + width / 2);
+          const pixelY4 = Math.floor(isoY4 + height / 2);
+
+
+          // Calculate the color of the current point
+          const color = colorLookup(map[x][y]);
+
+          // Begin a new path and draw the polygon formed by the current point and its neighbors
+          context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]},1)`;
+          context.strokeStyle = context.fillStyle;
+          context.beginPath();
+          context.moveTo(pixelX2, pixelY2);
+          context.lineTo(pixelX4, pixelY4);
+          context.lineTo(pixelX3, pixelY3);
+          context.stroke();
+          context.lineTo(pixelX1, pixelY1);
+          context.stroke();
+          context.fill();
+        }
         
       }
     }
