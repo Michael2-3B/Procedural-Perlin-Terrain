@@ -35,6 +35,9 @@ function initializeRangeInput() {
   var lightPositionInput = document.getElementById('light-position');
   var lightPositionValue = document.getElementById('light-position-value');
 
+  var lightHeightInput = document.getElementById('light-height');
+  var lightHeightValue = document.getElementById('light-height-value');
+
   // Set the initial value of the span to the value of the range input
   persistenceValue.innerHTML = "Persistence: " + persistenceInput.value;
   octavesValue.innerHTML = "Octaves: " + octavesInput.value;
@@ -44,10 +47,16 @@ function initializeRangeInput() {
   peaksValue.innerHTML = "Peaks: " + peaksInput.value;
   beachValue.innerHTML = "Beach Size: " + beachInput.value;
   lightValue.innerHTML = "World Light: " + lightInput.value;
-  lightPositionValue.innerHTML = "Block Light Position: " + lightPositionInput.value;
+  lightPositionValue.innerHTML = "Light Position: " + lightPositionInput.value;
+  lightHeightValue.innerHTML = "Light Height Position: " + lightHeightInput.value;
+
+  lightHeightInput.addEventListener('input', function() {
+    lightHeightValue.innerHTML = "Light Height Position: " + document.getElementById('light-height').value;
+    generateMap();
+  });
 
   lightPositionInput.addEventListener('input', function() {
-    lightPositionValue.innerHTML = "Block Light Position: " + document.getElementById('light-position').value;
+    lightPositionValue.innerHTML = "Light Position: " + document.getElementById('light-position').value;
     generateMap();
   });
 
@@ -133,13 +142,19 @@ function initializeRangeInput() {
 
     if (document.getElementById('isometricRendering').checked) {
 
-      document.getElementById('coordX').innerHTML = "Coord X: i dunno";
-      document.getElementById('coordZ').innerHTML = "Coord Z: math is hard";
+      document.getElementById('coordX').innerHTML = "Coord X: uh";
+      document.getElementById('coordZ').innerHTML = "Coord Z: idk man";
 
     } else {
 
-      document.getElementById('coordX').innerHTML = "Coord X: " + (Math.floor(event.offsetX/(canvas.width/100)) + parseInt(document.getElementById('offset-x-input').value));
-      document.getElementById('coordZ').innerHTML = "Coord Z: " + (Math.floor(event.offsetY/(canvas.height/100)) + parseInt(document.getElementById('offset-z-input').value));
+      let zoom = Math.floor(99 * parseFloat(document.getElementById('zoom-input').value)/2);
+      let tileCount = (99 - zoom) - zoom;
+
+      let x = zoom + Math.floor(event.offsetX/(canvas.width/tileCount)) + parseInt(document.getElementById('offset-x-input').value);
+      let z = zoom + Math.floor(event.offsetY/(canvas.height/tileCount)) + parseInt(document.getElementById('offset-z-input').value);
+
+      document.getElementById('coordX').innerHTML = "Coord X: " + x;
+      document.getElementById('coordZ').innerHTML = "Coord Z: " + z;
       
     }
 
@@ -334,7 +349,6 @@ function perlinNoise(width, height, persistence, octaves, wavelengthValue, prng)
   return noise;
 }
 
-
 // Helper function to calculate the dot product of two vectors
 function dotProduct(v1, v2) {
   return v1[0] * v2[0] + v1[1] * v2[1];
@@ -426,7 +440,17 @@ function generateMap(){
     const isoLength = zoom;  // adjust this value to control the length of the isometric view
 
     const lightPosition = parseInt(document.getElementById('light-position').value);
+    const lightHeight = parseInt(document.getElementById('light-height').value);
     const lightOffset = 30;
+    const lightHeightChange = (90-lightHeight);
+    const lightLeftChange = Math.max(-lightHeight/2-lightOffset,Math.min(lightHeight/2+lightOffset,-lightOffset-lightPosition));
+    const lightRightChange = Math.max(-lightHeight/2-lightOffset,Math.min(lightHeight/2+lightOffset,-lightOffset+lightPosition));
+    
+    const sunsetPosition = lightPosition/100;
+    let sunset1 = 3-sunsetPosition;
+    let sunset2 = 1.5-sunsetPosition/2;
+    let sunset3 = 3+sunsetPosition
+    let sunset4 = 1.5+sunsetPosition/2;
 
     // Set the size of the canvas
     canvas.width = 173*5;
@@ -514,7 +538,7 @@ function generateMap(){
           const color = colorLookup(blockHeight);
 
           //Draw Left Face
-          context.fillStyle = `rgba(${Math.min(255,Math.max(0,color[0]-lightOffset-lightPosition))}, ${Math.min(255,Math.max(0,color[1]-lightOffset-lightPosition))}, ${Math.min(255,Math.max(0,color[2]-lightOffset-lightPosition))},1)`;
+          context.fillStyle = `rgba(${Math.min(255,Math.max(0,color[0]-lightHeightChange/sunset1+lightLeftChange+Math.min(0,lightHeight)))}, ${Math.min(255,Math.max(0,color[1]-lightHeightChange/sunset2+lightLeftChange+Math.min(0,lightHeight)))}, ${Math.min(255,Math.max(0,color[2]-lightHeightChange+lightLeftChange+Math.min(0,lightHeight)))},1)`;
           context.strokeStyle = context.fillStyle;
           context.beginPath();
           context.moveTo(pixelX3, pixelY3);
@@ -525,7 +549,7 @@ function generateMap(){
           context.fill();
 
           //Draw Right Face
-          context.fillStyle = `rgba(${Math.min(255,Math.max(0,color[0]-lightOffset+lightPosition))}, ${Math.min(255,Math.max(0,color[1]-lightOffset+lightPosition))}, ${Math.min(255,Math.max(0,color[2]-lightOffset+lightPosition))},1)`;
+          context.fillStyle = `rgba(${Math.min(255,Math.max(0,color[0]-lightHeightChange/sunset3+lightRightChange+Math.min(0,lightHeight)))}, ${Math.min(255,Math.max(0,color[1]-lightHeightChange/sunset4+lightRightChange+Math.min(0,lightHeight)))}, ${Math.min(255,Math.max(0,color[2]-lightHeightChange+lightRightChange+Math.min(0,lightHeight)))},1)`;
           context.strokeStyle = context.fillStyle;
           context.beginPath();
           context.moveTo(pixelX4, pixelY4);
@@ -536,7 +560,7 @@ function generateMap(){
           context.fill();
 
           //Draw Top Face
-          context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]},1)`;
+          context.fillStyle = `rgba(${Math.max(0,color[0]-lightHeightChange/4+Math.min(0,lightHeight))}, ${Math.max(0,color[1]-lightHeightChange/2+Math.min(0,lightHeight))}, ${Math.max(0,color[2]-lightHeightChange+Math.min(0,lightHeight))},1)`;
           context.strokeStyle = context.fillStyle;
           context.beginPath();
           context.moveTo(pixelX1, pixelY1);
@@ -573,7 +597,7 @@ function generateMap(){
 
 
           // Calculate the color of the current point
-          const color = colorLookup(map[x][y]);
+          const color = colorLookup((mapvalue + mapvalue1 + mapvalue2 + mapvalue3) / 4);
 
           // Begin a new path and draw the polygon formed by the current point and its neighbors
           context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]},1)`;
@@ -594,15 +618,15 @@ function generateMap(){
     canvas.width = 690;
     canvas.height = 690;
     let newZoom = (1-(1-zoom)/2);
-    let tileCount = (width - Math.floor(100*(1-newZoom))) - Math.floor(100*(1-newZoom));
-    for (let y = Math.floor(100*(1-newZoom)); y < height - Math.floor(100*(1-newZoom)); y++) {
-      for (let x = Math.floor(100*(1-newZoom)); x < width - Math.floor(100*(1-newZoom)); x++) {
-        const color = colorLookup(map[x][y]);
+    let tileCount = (99 - Math.floor(99*(1-newZoom))) - Math.floor(99*(1-newZoom));
+    for (let y = Math.floor(99*(1-newZoom)); y < height - 1 - Math.floor(99*(1-newZoom)); y++) {
+      for (let x = Math.floor(99*(1-newZoom)); x < width - 1 - Math.floor(99*(1-newZoom)); x++) {
+        const color = colorLookup((map[x][y] + map[x+1][y] + map[x][y+1] + map[x+1][y+1])/4);
 
         context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]},1)`;
 
-        let xDiff = x - Math.floor(100*(1-newZoom));
-        let yDiff = y - Math.floor(100*(1-newZoom));
+        let xDiff = x - Math.floor(99*(1-newZoom));
+        let yDiff = y - Math.floor(99*(1-newZoom));
 
         context.fillRect(Math.floor(xDiff*(canvas.width/tileCount)), Math.floor(yDiff*(canvas.height/tileCount)), Math.round(0.5+canvas.width/tileCount), Math.round(0.5+canvas.height/tileCount));
       }
