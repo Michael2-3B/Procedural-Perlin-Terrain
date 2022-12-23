@@ -3,6 +3,7 @@ const worldBorder = 29999984;
 
 // Define a function to initialize the range input and span
 function initializeRangeInput() {
+
   // Get a reference to the range input and the span
   var persistenceInput = document.getElementById('persistence-input');
   var persistenceValue = document.getElementById('persistence-value');
@@ -22,9 +23,6 @@ function initializeRangeInput() {
   var peaksInput = document.getElementById('peaks-input');
   var peaksValue = document.getElementById('peaks-value');
 
-  var scaleInput = document.getElementById('scale-input');
-  var scaleValue = document.getElementById('scale-value');
-
   var zoomInput = document.getElementById('zoom-input');
   var zoomValue = document.getElementById('zoom-value');
 
@@ -38,17 +36,15 @@ function initializeRangeInput() {
   var lightPositionValue = document.getElementById('light-position-value');
 
   // Set the initial value of the span to the value of the range input
-  persistenceValue.innerText = "Persistence: " + persistenceInput.value;
-  octavesValue.innerText = "Octaves: " + octavesInput.value;
-  wavelengthValue.innerText = "Wavelength: " + wavelengthInput.value;
-  waterValue.innerText = "Water Level: " + waterLevel.value;
-  exponentValue.innerText = "Exponent: " + exponentInput.value;
-  peaksValue.innerText = "Peaks: " + peaksInput.value;
-  scaleValue.innerText = "Canvas Scale: " + scaleInput.value;
-  zoomValue.innerText = "Iso Zoom: " + zoomInput.value;
-  beachValue.innerText = "Beach Size: " + beachInput.value;
-  lightValue.innerText = "World Light: " + lightInput.value;
-  lightPositionValue.innerText = "Block Light Position: " + lightPositionInput.value;
+  persistenceValue.innerHTML = "Persistence: " + persistenceInput.value;
+  octavesValue.innerHTML = "Octaves: " + octavesInput.value;
+  wavelengthValue.innerHTML = "Wavelength: " + wavelengthInput.value;
+  waterValue.innerHTML = "Water Level: " + waterLevel.value;
+  exponentValue.innerHTML = "Exponent: " + exponentInput.value;
+  peaksValue.innerHTML = "Peaks: " + peaksInput.value;
+  beachValue.innerHTML = "Beach Size: " + beachInput.value;
+  lightValue.innerHTML = "World Light: " + lightInput.value;
+  lightPositionValue.innerHTML = "Block Light Position: " + lightPositionInput.value;
 
   lightPositionInput.addEventListener('input', function() {
     lightPositionValue.innerHTML = "Block Light Position: " + document.getElementById('light-position').value;
@@ -96,14 +92,7 @@ function initializeRangeInput() {
     generateMap();
   });
 
-  scaleInput.addEventListener('input', function() {
-    scaleValue.innerHTML = "Canvas Scale: " + document.getElementById('scale-input').value;
-    document.getElementById('my-canvas').style.transformOrigin = 'top left';
-    document.getElementById('my-canvas').style.transform = 'scale(' + document.getElementById('scale-input').value + ')';
-  });
-
   zoomInput.addEventListener('input', function() {
-    zoomValue.innerHTML = "Iso Zoom: " + document.getElementById('zoom-input').value;
     generateMap();
   });
 
@@ -142,27 +131,27 @@ function initializeRangeInput() {
 
   canvas.addEventListener("mousemove", function(event) {
 
-    if (document.getElementById('checkbox').checked) {
+    if (document.getElementById('isometricRendering').checked) {
 
       document.getElementById('coordX').innerHTML = "Coord X: i dunno";
       document.getElementById('coordZ').innerHTML = "Coord Z: math is hard";
 
     } else {
 
-      let x = event.offsetX + parseInt(document.getElementById('offset-x-input').value);
-      let y = event.offsetY + parseInt(document.getElementById('offset-z-input').value);
-
-      document.getElementById('coordX').innerHTML = "Coord X: " + x;
-      document.getElementById('coordZ').innerHTML = "Coord Z: " + y;
+      document.getElementById('coordX').innerHTML = "Coord X: " + (Math.floor(event.offsetX/(canvas.width/100)) + parseInt(document.getElementById('offset-x-input').value));
+      document.getElementById('coordZ').innerHTML = "Coord Z: " + (Math.floor(event.offsetY/(canvas.height/100)) + parseInt(document.getElementById('offset-z-input').value));
       
     }
 
     // If the mouse button is being held down, update the offset values based on the change in mouse position
     if (isMouseDown) {
-      if (document.getElementById('checkbox').checked){
+      const scaleX = 0.2;
+      const scaleY = 0.2;
+      let transformedX;
+      let transformedY;
+
+      if (document.getElementById('isometricRendering').checked){
         // Set up the scale and rotation factors for the transformation
-        const scaleX = 1;
-        const scaleY = 1.5;
         const rotation = 45;
 
         // Calculate the sin and cos of the rotation angle
@@ -172,8 +161,8 @@ function initializeRangeInput() {
         // Calculate the transformed offset values based on the change in mouse position
         const dx = event.offsetX - currentX;
         const dy = event.offsetY - currentY;
-        const transformedX = dx * sinR * scaleX + dy * cosR * scaleY;
-        const transformedY = -(dx * cosR * scaleX - dy * sinR * scaleY);
+        transformedX = dx * sinR * scaleX + dy * cosR * scaleY;
+        transformedY = -(dx * cosR * scaleX - dy * sinR * scaleY);
 
         // Update the offset values and the current mouse position
         offsetX += transformedX;
@@ -181,21 +170,25 @@ function initializeRangeInput() {
         currentX = event.offsetX;
         currentY = event.offsetY;
 
-        // Update the input elements with the new offset values
-        document.getElementById('offset-x-input').value = parseInt(document.getElementById('offset-x-input').value) - parseInt(transformedX);
-        document.getElementById('offset-z-input').value = parseInt(document.getElementById('offset-z-input').value) - parseInt(transformedY);
-
       } else {
-        offsetX += event.offsetX - currentX;
-        document.getElementById('offset-x-input').value = parseInt(document.getElementById('offset-x-input').value) - parseInt(event.offsetX - currentX);
-        offsetY += event.offsetY - currentY;
-        document.getElementById('offset-z-input').value = parseInt(document.getElementById('offset-z-input').value) - parseInt(event.offsetY - currentY);
+
+        transformedX = scaleX * (event.offsetX - currentX);
+        transformedY = scaleY * (event.offsetY - currentY);
+
+        offsetX += transformedX;
+        offsetY += transformedY;
+
         currentX = event.offsetX;
         currentY = event.offsetY;
+
       }
 
-      document.getElementById('offset-x-input').value = Math.max(-worldBorder,Math.min(parseInt(document.getElementById('offset-x-input').value),worldBorder));
-      document.getElementById('offset-z-input').value = Math.max(-worldBorder,Math.min(parseInt(document.getElementById('offset-z-input').value),worldBorder));
+      // Update the input elements with the new offset values
+      document.getElementById('offset-x-input').value = parseInt(document.getElementById('offset-x-input').value) - parseInt(transformedX);
+      document.getElementById('offset-z-input').value = parseInt(document.getElementById('offset-z-input').value) - parseInt(transformedY);
+
+      document.getElementById('offset-x-input').value = Math.max(-worldBorder,Math.min(worldBorder,parseInt(document.getElementById('offset-x-input').value)));
+      document.getElementById('offset-z-input').value = Math.max(-worldBorder,Math.min(worldBorder,parseInt(document.getElementById('offset-z-input').value)));
 
       generateMap();
     }
@@ -250,6 +243,19 @@ function randomizeInputs() {
   document.getElementById('beach-value').innerHTML = "Beach Size: " + document.getElementById('beach-input').value;
 
   generateMap();
+}
+
+function changeMargin() {
+  let myCanvasDiv = document.getElementById('canvas-div');
+  let myCanvas = document.getElementById('my-canvas');
+
+  if (document.getElementById('isometricRendering').checked){
+    myCanvasDiv.style.marginLeft = '40px';
+    myCanvas.style.boxShadow = 'none';
+  } else {
+    myCanvasDiv.style.marginLeft = '10px';
+    myCanvas.style.boxShadow = '10px 10px 30px rgba(0, 0, 0, 0.5)';
+  }
 }
 
 class SeedablePRNG {
@@ -414,7 +420,7 @@ function generateMap(){
 
   // Generate a height map visualization of the Perlin noise values
 
-  if (document.getElementById('checkbox').checked) {
+  if (document.getElementById('isometricRendering').checked) {
     const isoHeight = 20 / zoom;  // adjust this value to control the height of the isometric view
     const isoWidth = zoom;   // adjust this value to control the width of the isometric view
     const isoLength = zoom;  // adjust this value to control the length of the isometric view
@@ -423,13 +429,13 @@ function generateMap(){
     const lightOffset = 30;
 
     // Set the size of the canvas
-    canvas.width = 173;
-    canvas.height = 150;
+    canvas.width = 173*5;
+    canvas.height = 138*5;
 
     const ang = 6;
 
     // Translate the context so that the terrain is centered in the canvas
-    context.translate(37,-37/zoom+17);
+    context.translate(382,-200/zoom+275);
 
     for (let y = 0; y < height - 1; y++) {
       for (let x = 0; x < width - 1; x++) {
@@ -490,20 +496,20 @@ function generateMap(){
           const isoX7 = (x + 1 - y) * Math.cos(Math.PI / ang) / isoWidth;
           const isoY7 = (x + 1 + y) * Math.sin(Math.PI / ang) / isoLength - (blockHeight - blockSize) * isoHeight;
 
-          const pixelX1 = Math.floor(isoX1 + width / 2);
-          const pixelY1 = Math.floor(isoY1 + height / 2);
-          const pixelX2 = Math.floor(isoX2 + width / 2);
-          const pixelY2 = Math.floor(isoY2 + height / 2);
-          const pixelX3 = Math.floor(isoX3 + width / 2);
-          const pixelY3 = Math.floor(isoY3 + height / 2);
-          const pixelX4 = Math.floor(isoX4 + width / 2);
-          const pixelY4 = Math.floor(isoY4 + height / 2);
-          const pixelX5 = Math.floor(isoX5 + width / 2);
-          const pixelY5 = Math.floor(isoY5 + height / 2);
-          const pixelX6 = Math.floor(isoX6 + width / 2);
-          const pixelY6 = Math.floor(isoY6 + height / 2);
-          const pixelX7 = Math.floor(isoX7 + width / 2);
-          const pixelY7 = Math.floor(isoY7 + height / 2);
+          const pixelX1 = Math.floor(5 * isoX1 + width / 2);
+          const pixelY1 = Math.floor(5 * isoY1 + height / 2);
+          const pixelX2 = Math.floor(5 * isoX2 + width / 2);
+          const pixelY2 = Math.floor(5 * isoY2 + height / 2);
+          const pixelX3 = Math.floor(5 * isoX3 + width / 2);
+          const pixelY3 = Math.floor(5 * isoY3 + height / 2);
+          const pixelX4 = Math.floor(5 * isoX4 + width / 2);
+          const pixelY4 = Math.floor(5 * isoY4 + height / 2);
+          const pixelX5 = Math.floor(5 * isoX5 + width / 2);
+          const pixelY5 = Math.floor(5 * isoY5 + height / 2);
+          const pixelX6 = Math.floor(5 * isoX6 + width / 2);
+          const pixelY6 = Math.floor(5 * isoY6 + height / 2);
+          const pixelX7 = Math.floor(5 * isoX7 + width / 2);
+          const pixelY7 = Math.floor(5 * isoY7 + height / 2);
 
           const color = colorLookup(blockHeight);
 
@@ -556,14 +562,14 @@ function generateMap(){
           const isoY4 = (x + 1 + (y + 1)) * Math.sin(Math.PI / ang) / isoLength - mapvalue3 * isoHeight;
 
           // Calculate the pixel coordinates of the isometric points
-          const pixelX1 = Math.floor(isoX1 + width / 2);
-          const pixelY1 = Math.floor(isoY1 + height / 2);
-          const pixelX2 = Math.floor(isoX2 + width / 2);
-          const pixelY2 = Math.floor(isoY2 + height / 2);
-          const pixelX3 = Math.floor(isoX3 + width / 2);
-          const pixelY3 = Math.floor(isoY3 + height / 2);
-          const pixelX4 = Math.floor(isoX4 + width / 2);
-          const pixelY4 = Math.floor(isoY4 + height / 2);
+          const pixelX1 = Math.floor(5 * isoX1 + width / 2);
+          const pixelY1 = Math.floor(5 * isoY1 + height / 2);
+          const pixelX2 = Math.floor(5 * isoX2 + width / 2);
+          const pixelY2 = Math.floor(5 * isoY2 + height / 2);
+          const pixelX3 = Math.floor(5 * isoX3 + width / 2);
+          const pixelY3 = Math.floor(5 * isoY3 + height / 2);
+          const pixelX4 = Math.floor(5 * isoX4 + width / 2);
+          const pixelY4 = Math.floor(5 * isoY4 + height / 2);
 
 
           // Calculate the color of the current point
@@ -585,21 +591,22 @@ function generateMap(){
       }
     }
   } else {
-    canvas.width = width;
-    canvas.height = height;
-    const imageData = context.createImageData(width, height);
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        const index = (x + y * width) * 4;
+    canvas.width = 690;
+    canvas.height = 690;
+    let newZoom = (1-(1-zoom)/2);
+    let tileCount = (width - Math.floor(100*(1-newZoom))) - Math.floor(100*(1-newZoom));
+    for (let y = Math.floor(100*(1-newZoom)); y < height - Math.floor(100*(1-newZoom)); y++) {
+      for (let x = Math.floor(100*(1-newZoom)); x < width - Math.floor(100*(1-newZoom)); x++) {
         const color = colorLookup(map[x][y]);
 
-        imageData.data[index] = color[0];
-        imageData.data[index + 1] = color[1];
-        imageData.data[index + 2] = color[2];
-        imageData.data[index + 3] = 255;
+        context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]},1)`;
+
+        let xDiff = x - Math.floor(100*(1-newZoom));
+        let yDiff = y - Math.floor(100*(1-newZoom));
+
+        context.fillRect(Math.floor(xDiff*(canvas.width/tileCount)), Math.floor(yDiff*(canvas.height/tileCount)), Math.round(0.5+canvas.width/tileCount), Math.round(0.5+canvas.height/tileCount));
       }
     }
-    context.putImageData(imageData, 0, 0);
   }
    
 }
