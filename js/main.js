@@ -48,10 +48,10 @@ function initializeRangeInput() {
   beachValue.innerHTML = "Beach Size: " + beachInput.value;
   lightValue.innerHTML = "World Light: " + lightInput.value;
   lightPositionValue.innerHTML = "Light Position: " + lightPositionInput.value;
-  lightHeightValue.innerHTML = "Light Height Position: " + lightHeightInput.value;
+  lightHeightValue.innerHTML = "Light Height: " + lightHeightInput.value;
 
   lightHeightInput.addEventListener('input', function() {
-    lightHeightValue.innerHTML = "Light Height Position: " + document.getElementById('light-height').value;
+    lightHeightValue.innerHTML = "Light Height: " + document.getElementById('light-height').value;
     generateMap();
   });
 
@@ -442,7 +442,8 @@ function generateMap(){
     const lightPosition = parseInt(document.getElementById('light-position').value);
     const lightHeight = parseInt(document.getElementById('light-height').value);
     const lightOffset = 30;
-    const lightHeightChange = (90-lightHeight);
+    let lightHeightChange = (90-lightHeight);
+    lightHeightChange /= 3-(lightHeight+90)/90;
     const lightLeftChange = Math.max(-lightHeight/2-lightOffset,Math.min(lightHeight/2+lightOffset,-lightOffset-lightPosition));
     const lightRightChange = Math.max(-lightHeight/2-lightOffset,Math.min(lightHeight/2+lightOffset,-lightOffset+lightPosition));
     
@@ -457,9 +458,17 @@ function generateMap(){
     canvas.height = 138*5;
 
     const ang = 6;
+    let wibble = 1;
+    let drawScale = 5;
 
     // Translate the context so that the terrain is centered in the canvas
-    context.translate(382,-200/zoom+275);
+    if (document.getElementById('wibble-wobble').checked) {
+      wibble = 5;
+      drawScale = 1;
+      context.translate(184,-200/zoom+75);
+    } else {
+      context.translate(382,-200/zoom+275);
+    }
 
     for (let y = 0; y < height - 1; y++) {
       for (let x = 0; x < width - 1; x++) {
@@ -520,20 +529,20 @@ function generateMap(){
           const isoX7 = (x + 1 - y) * Math.cos(Math.PI / ang) / isoWidth;
           const isoY7 = (x + 1 + y) * Math.sin(Math.PI / ang) / isoLength - (blockHeight - blockSize) * isoHeight;
 
-          const pixelX1 = Math.floor(5 * isoX1 + width / 2);
-          const pixelY1 = Math.floor(5 * isoY1 + height / 2);
-          const pixelX2 = Math.floor(5 * isoX2 + width / 2);
-          const pixelY2 = Math.floor(5 * isoY2 + height / 2);
-          const pixelX3 = Math.floor(5 * isoX3 + width / 2);
-          const pixelY3 = Math.floor(5 * isoY3 + height / 2);
-          const pixelX4 = Math.floor(5 * isoX4 + width / 2);
-          const pixelY4 = Math.floor(5 * isoY4 + height / 2);
-          const pixelX5 = Math.floor(5 * isoX5 + width / 2);
-          const pixelY5 = Math.floor(5 * isoY5 + height / 2);
-          const pixelX6 = Math.floor(5 * isoX6 + width / 2);
-          const pixelY6 = Math.floor(5 * isoY6 + height / 2);
-          const pixelX7 = Math.floor(5 * isoX7 + width / 2);
-          const pixelY7 = Math.floor(5 * isoY7 + height / 2);
+          const pixelX1 = wibble * Math.floor(drawScale * isoX1 + width / 2);
+          const pixelY1 = wibble * Math.floor(drawScale * isoY1 + height / 2);
+          const pixelX2 = wibble * Math.floor(drawScale * isoX2 + width / 2);
+          const pixelY2 = wibble * Math.floor(drawScale * isoY2 + height / 2);
+          const pixelX3 = wibble * Math.floor(drawScale * isoX3 + width / 2);
+          const pixelY3 = wibble * Math.floor(drawScale * isoY3 + height / 2);
+          const pixelX4 = wibble * Math.floor(drawScale * isoX4 + width / 2);
+          const pixelY4 = wibble * Math.floor(drawScale * isoY4 + height / 2);
+          const pixelX5 = wibble * Math.floor(drawScale * isoX5 + width / 2);
+          const pixelY5 = wibble * Math.floor(drawScale * isoY5 + height / 2);
+          const pixelX6 = wibble * Math.floor(drawScale * isoX6 + width / 2);
+          const pixelY6 = wibble * Math.floor(drawScale * isoY6 + height / 2);
+          const pixelX7 = wibble * Math.floor(drawScale * isoX7 + width / 2);
+          const pixelY7 = wibble * Math.floor(drawScale * isoY7 + height / 2);
 
           const color = colorLookup(blockHeight);
 
