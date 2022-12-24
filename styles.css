@@ -1,6 +1,19 @@
+input {
+  margin-right: 5px;
+}
+
+input[type='number']:not(.offset) {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+input[type='number'] {
+  margin-top: 5px;
+}
+
 input[type='range']:not(.zoom) {
   background-color: transparent;
-  height: 10px;
+  height: 5px;
 }
 
 /** FF*/
@@ -18,10 +31,37 @@ input[type="range"]::-ms-fill-upper {
   background-color: #9a905d;
 }
 
+div:not(.siteContainerDiv) {
+  display: inline-block;
+}
 
-input[type='number'] {
-  margin-bottom: 5px;
+body {
+  background-color: #dddddd;
+}
+
+canvas {
+  box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.siteContainerDiv {
+  display: flex;
+  flex-direction: row;
+  margin-top: 20px;
+}
+
+.inputsDiv {
   margin-right: 10px;
+  margin-left: 10px;
+  width: 400px;
+  height: 670px;
+  background-color: #eeeeee;
+  padding: 10px;
+}
+
+.zoomSliderDiv {
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-top: 180px;
 }
 
 .zoom {
@@ -31,6 +71,10 @@ input[type='number'] {
   height: 300px;
 }
 
-canvas {
-  box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
+#resetAll {
+  margin-bottom: 10px;
+}
+
+#canvas-div {
+  margin-left: 10px;
 }

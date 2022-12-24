@@ -142,8 +142,8 @@ function initializeRangeInput() {
 
     if (document.getElementById('isometricRendering').checked) {
 
-      document.getElementById('coordX').innerHTML = "Coord X: uh";
-      document.getElementById('coordZ').innerHTML = "Coord Z: idk man";
+      //document.getElementById('coordX').innerHTML = "Coord X: ---";
+      //document.getElementById('coordZ').innerHTML = "Coord Z: ---";
 
     } else {
 
@@ -462,7 +462,7 @@ function generateMap(){
     let drawScale = 5;
 
     // Translate the context so that the terrain is centered in the canvas
-    if (document.getElementById('wibble-wobble').checked) {
+    if (document.getElementById('wibbleWobble').checked && document.getElementById('blockRendering').checked) {
       wibble = 5;
       drawScale = 1;
       context.translate(184,-200/zoom+75);

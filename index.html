@@ -6,20 +6,21 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <script src="js/main.js"></script>
 </head>
-<body style="background-color: #dddddd;">
-  <div style="display: flex; flex-direction: row; margin-top: 20px;">
+<body>
+  <div class="siteContainerDiv">
 
-    <div style="display: inline-block; margin-right: 10px; margin-left: 10px; width: 400px; height: 670px; background-color: #eeeeee; padding: 10px;">
-      <button style="margin-bottom: 10px;" onclick="document.getElementById('seed-input').value = Math.floor(Math.random()*999999999);generateMap()">Generate Random Seed</button><br>
+    <div class="inputsDiv">
+      <button onclick="document.getElementById('seed-input').value = Math.floor(Math.random()*999999999);generateMap()">Generate Random Seed</button><br>
 
-      <span>Seed: </span><input type="number" id="seed-input" min="0" value="0" onchange="generateMap()"><br><br>
+      <span>Seed: </span><input type="number" id="seed-input" min="0" value="0" onchange="generateMap()"><br>
 
-      <span>Offset X: </span><input type="number" id="offset-x-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: +-29,999,984</span><br>
-      <span>Offset Z: </span><input type="number" id="offset-z-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: +-29,999,984</span><br><br>
+      <span>Offset X: </span><input class="offset" type="number" id="offset-x-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: +-29,999,984</span><br>
+      <span>Offset Z: </span><input class="offset" type="number" id="offset-z-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: +-29,999,984</span><br><br>
+
       <span id="coordX">Coord X:</span><br>
       <span id="coordZ">Coord Z:</span><br><br>
 
-      <button onclick="resetAll()" style="margin-bottom: 10px;">Reset All</button><br>
+      <button id="resetAll" onclick="resetAll()">Reset All</button><br>
 
       <b>Noise Map Values:</b><br>
       <button class="reset" onclick="document.getElementById('persistence-input').value = 1;document.getElementById('persistence-value').innerHTML = 'Persistence: 1';generateMap()">Reset</button>
@@ -55,16 +56,16 @@
       <button class="reset" onclick="document.getElementById('light-height').value = 90;document.getElementById('light-height-value').innerHTML = 'Light Height: 90';generateMap()">Reset</button>
       <input type="range" min="-90" max="90" value="90" id="light-height"><span id="light-height-value"></span><br><br>
 
-      <input type="checkbox" id="isometricRendering" onchange="changeMargin();generateMap();"><span style="margin-left: 5px;">Toggle Isometric View</span><br>
-      <input type="checkbox" id="blockRendering" onchange="generateMap()"><span style="margin-left: 5px;">Toggle Isometric Blocks</span><br><br>
-      <input type="checkbox" id="wibble-wobble" onchange="generateMap()"><span style="margin-left: 5px;">Block Wibble Wobble</span>
+      <input type="checkbox" id="isometricRendering" onchange="changeMargin();generateMap();"><span>Toggle Isometric View</span><br>
+      <input type="checkbox" id="blockRendering" onchange="generateMap()"><span>Toggle Isometric Blocks</span><br><br>
+      <input type="checkbox" id="wibbleWobble" onchange="generateMap()"><span>Block Wibble Wobble</span>
     </div>
 
-    <div style="display: inline-block; margin-left: 15px; margin-right: 15px; margin-top: 180px;">
+    <div class="zoomSliderDiv">
       <input type="range" class="zoom" orient="vertical" min="0" max="0.99" value="0" step="0.01" id="zoom-input"><br>
     </div>
 
-    <div id="canvas-div" style="display: inline-block; margin-left: 10px;">
+    <div id="canvas-div">
       <canvas class="shadow" id="my-canvas" width="690" height="690"></canvas>
     </div>
 
