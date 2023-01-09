@@ -45,18 +45,36 @@ canvas {
   box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-button {
-  border: 1px solid #111111;
-  background-color: #eeeeee;
-  color: black;
-}
-
 a {
   color: black;
 }
 
 a:visited {
   color: black;
+}
+
+.darkButton {
+  border: 1px solid #cccccc;
+  background-color: #333333;
+  color: white;
+}
+.darkButton:hover {
+  background-color: #555555;
+}
+.darkButton:active {
+  background-color: #777777;
+}
+
+.lightButton {
+  border: 1px solid #111111;
+  background-color: #eeeeee;
+  color: black;
+}
+.lightButton:hover {
+  background-color: #cccccc;
+}
+.lightButton:active {
+  background-color: #aaaaaa;
 }
 
 .siteContainerDiv {

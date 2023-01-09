@@ -86,11 +86,11 @@
       <button class="stepper" onmousedown="stepperPressed('light-height','light-height-value',1)" onmouseup="stepperReleased()">></button>
       <span id="light-height-value"></span><br><br>
 
-      <input type="checkbox" id="isometricRendering" onchange="changeMargin();generateMap();"><span>Toggle Isometric View</span><br>
-      <input type="checkbox" id="sideFill" onchange="generateMap()"><span>Fill Sides</span><br>
-      <input type="checkbox" id="coastline" onchange="generateMap()"><span>Outline Coast</span><br><br>
-      <input type="checkbox" id="darkMode" onchange="changeBackground();generateMap();"><span>Dark Mode</span><br>
-      <input type="checkbox" id="dynamicMode" onchange="changeBackground();generateMap();"><span>Dynamic Background Color</span>
+      <label><input type="checkbox" id="isometricRendering" onchange="changeMargin();generateMap();"><span>Toggle Isometric View</span></label><br>
+      <label><input type="checkbox" id="sideFill" onchange="generateMap()"><span>Fill Sides</span></label><br>
+      <label><input type="checkbox" id="coastline" onchange="generateMap()"><span>Outline Coast</span></label><br><br>
+      <label><input type="checkbox" id="darkMode" onchange="changeBackground();generateMap();"><span>Dark Mode</span></label><br>
+      <label><input type="checkbox" id="dynamicMode" onchange="changeBackground();generateMap();"><span>Dynamic Background Color</span></label>
     </div>
 
     <div class="zoomSliderDiv">

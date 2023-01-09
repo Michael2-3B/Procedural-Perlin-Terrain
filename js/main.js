@@ -232,6 +232,11 @@ function initializeRangeInput() {
     });
   });
 
+  // add the "lightButton" class to each button
+  document.querySelectorAll("button").forEach(function(button) {
+    button.classList.add("lightButton");
+  });
+
   generateMap();
 
 }
@@ -334,23 +339,24 @@ function changeMargin() {
 }
 
 function changeBackground() {
+  let spanElements = document.getElementsByTagName("span");
+  let buttons = document.querySelectorAll("button");
+
   if (document.getElementById('darkMode').checked) {
     document.body.style.backgroundColor = "#111111";
     document.getElementById('myInputDiv').style.backgroundColor = "#222222";
 
     document.querySelector('a').style.color = 'white';
 
-    let spanElements = document.getElementsByTagName("span");
     for (let i = 0; i < spanElements.length; i++) {
         spanElements[i].style.color = "white";
     }
 
-    let buttonElements = document.getElementsByTagName("button");
-    for (let i = 0; i < buttonElements.length; i++) {
-        buttonElements[i].style.color = "white";
-        buttonElements[i].style.backgroundColor = "#333333";
-        buttonElements[i].style.border = "1px solid #cccccc";
-    }
+    // add the "darkButton" class to each button
+    buttons.forEach(function(button) {
+      button.classList.remove("lightButton");
+      button.classList.add("darkButton");
+    });
 
   } else {
     document.body.style.backgroundColor = "#dddddd";
@@ -358,17 +364,15 @@ function changeBackground() {
 
     document.querySelector('a').style.color = 'black';
 
-    let spanElements = document.getElementsByTagName("span");
     for (let i = 0; i < spanElements.length; i++) {
         spanElements[i].style.color = "black";
     }
 
-    let buttonElements = document.getElementsByTagName("button");
-    for (let i = 0; i < buttonElements.length; i++) {
-        buttonElements[i].style.color = "black";
-        buttonElements[i].style.backgroundColor = "#eeeeee";
-        buttonElements[i].style.border = "1px solid #111111";
-    }
+    // add the "lightButton" class to each button
+    buttons.forEach(function(button) {
+      button.classList.remove("darkButton");
+      button.classList.add("lightButton");
+    });
 
   }
 
