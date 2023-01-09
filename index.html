@@ -9,56 +9,88 @@
 <body>
   <div class="siteContainerDiv">
 
-    <div class="inputsDiv">
+    <div class="inputsDiv" id="myInputDiv">
       <button onclick="document.getElementById('seed-input').value = Math.floor(Math.random()*999999999);generateMap()">Generate Random Seed</button><br>
 
       <span>Seed: </span><input type="number" id="seed-input" min="0" value="0" onchange="generateMap()"><br>
 
-      <span>Offset X: </span><input class="offset" type="number" id="offset-x-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: +-29,999,984</span><br>
-      <span>Offset Z: </span><input class="offset" type="number" id="offset-z-input" min="-29999984" max="29999984" value="0" step="5" onchange="generateMap()"><span>Limit: +-29,999,984</span><br><br>
+      <span>Offset X: </span><input class="offset" type="number" id="offset-x-input" min="-29999984" max="29999984" value="0" step="1" onchange="generateMap()"><span>Limit: +-29,999,984</span><br>
+      <span>Offset Z: </span><input class="offset" type="number" id="offset-z-input" min="-29999984" max="29999984" value="0" step="1" onchange="generateMap()"><span>Limit: +-29,999,984</span><br><br>
 
       <span id="coordX">Coord X:</span><br>
       <span id="coordZ">Coord Z:</span><br><br>
 
       <button id="resetAll" onclick="resetAll()">Reset All</button><br>
 
-      <b>Noise Map Values:</b><br>
+      <b><span>Noise Map Values:</span></b><br>
       <button class="reset" onclick="document.getElementById('persistence-input').value = 1;document.getElementById('persistence-value').innerHTML = 'Persistence: 1';generateMap()">Reset</button>
-      <input type="range" min="0" max="1" value="1" step=".01" id="persistence-input"><span id="persistence-value"></span><br>
+      <button class="stepper" onmousedown="stepperPressed('persistence-input','persistence-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="0" max="1" value="1" step=".01" id="persistence-input">
+      <button class="stepper" onmousedown="stepperPressed('persistence-input','persistence-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="persistence-value"></span><br>
 
       <button class="reset" onclick="document.getElementById('octaves-input').value = 5;document.getElementById('octaves-value').innerHTML = 'Octaves: 5';generateMap()">Reset</button>
-      <input type="range" min="0" max="6" value="5" id="octaves-input"><span id="octaves-value"></span><br>
+      <button class="stepper" onmousedown="stepperPressed('octaves-input','octaves-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="1" max="6" value="5" step="1" id="octaves-input">
+      <button class="stepper" onmousedown="stepperPressed('octaves-input','octaves-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="octaves-value"></span><br>
 
       <button class="reset" onclick="document.getElementById('wavelength-input').value = 133;document.getElementById('wavelength-value').innerHTML = 'Wavelength: 133';generateMap()">Reset</button>
-      <input type="range" min="3" max="256" value="133" id="wavelength-input"><span id="wavelength-value"></span><br><br>
+      <button class="stepper" onmousedown="stepperPressed('wavelength-input','wavelength-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="3" max="256" value="133" step="1" id="wavelength-input">
+      <button class="stepper" onmousedown="stepperPressed('wavelength-input','wavelength-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="wavelength-value"></span><br><br>
 
-      <b>Terrain Customization:</b>
+      <b><span>Terrain Customization:</span></b>
       <button onclick="randomizeInputs()">Randomize</button><br>
       <button class="reset" onclick="document.getElementById('exponent-input').value = 3;document.getElementById('exponent-value').innerHTML = 'Exponent: 3';generateMap()">Reset</button>
-      <input type="range" min="0.1" max="10" value="3" step="0.05" id="exponent-input"><span id="exponent-value"></span><br>
+      <button class="stepper" onmousedown="stepperPressed('exponent-input','exponent-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="0.5" max="10" value="3" step="0.05" id="exponent-input">
+      <button class="stepper" onmousedown="stepperPressed('exponent-input','exponent-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="exponent-value"></span><br>
 
       <button class="reset" onclick="document.getElementById('peaks-input').value = 0.2;document.getElementById('peaks-value').innerHTML = 'Peaks: 0.2';generateMap()">Reset</button>
-      <input type="range" min="0" max="0.5" value="0.2" step="0.01" id="peaks-input"><span id="peaks-value"></span><br>
+      <button class="stepper" onmousedown="stepperPressed('peaks-input','peaks-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="0" max="0.3" value="0.2" step="0.01" id="peaks-input">
+      <button class="stepper" onmousedown="stepperPressed('peaks-input','peaks-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="peaks-value"></span><br>
 
       <button class="reset" onclick="document.getElementById('water-level').value = 60;document.getElementById('water-value').innerHTML = 'Water Level: 60';generateMap()">Reset</button>
-      <input type="range" min="0" max="255" value="60" id="water-level"><span id="water-value"></span><br>
+      <button class="stepper" onmousedown="stepperPressed('water-level','water-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="0" max="255" value="60" step="1" id="water-level">
+      <button class="stepper" onmousedown="stepperPressed('water-level','water-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="water-value"></span><br>
 
-      <button class="reset" onclick="document.getElementById('beach-input').value = .2;document.getElementById('beach-value').innerHTML = 'Beach Size: .2';generateMap()">Reset</button>
-      <input type="range" min="0" max="1" value=".2" step="0.01" id="beach-input"><span id="beach-value"></span><br><br>
+      <button class="reset" onclick="document.getElementById('beach-input').value = 25;document.getElementById('beach-value').innerHTML = 'Beach Size: 25';generateMap()">Reset</button>
+      <button class="stepper" onmousedown="stepperPressed('beach-input','beach-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="0" max="255" value="25" step="1" id="beach-input">
+      <button class="stepper" onmousedown="stepperPressed('beach-input','beach-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="beach-value"></span><br><br>
 
-      <b>Lighting:</b><br>
+      <b><span>Lighting:</span></b><br>
       <button class="reset" onclick="document.getElementById('light-input').value = 255;document.getElementById('light-value').innerHTML = 'World Light: 255';generateMap()">Reset</button>
-      <input type="range" min="0" max="255" value="255" id="light-input"><span id="light-value"></span><br>
+      <button class="stepper" onmousedown="stepperPressed('light-input','light-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="0" max="255" value="255" step="1" id="light-input">
+      <button class="stepper" onmousedown="stepperPressed('light-input','light-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="light-value"></span><br>
 
-      <button class="reset" onclick="document.getElementById('light-position').value = 0;document.getElementById('light-position-value').innerHTML = 'Light Position: 0';generateMap()">Reset</button>
-      <input type="range" min="-45" max="45" value="10" id="light-position"><span id="light-position-value"></span><br>
+      <button class="reset" onclick="document.getElementById('light-position').value = 180;document.getElementById('light-position-value').innerHTML = 'Light Position: 180';generateMap()">Reset</button>
+      <button class="stepper" onmousedown="stepperPressed('light-position','light-position-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="0" max="360" value="180" step="1" id="light-position">
+      <button class="stepper" onmousedown="stepperPressed('light-position','light-position-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="light-position-value"></span><br>
 
-      <button class="reset" onclick="document.getElementById('light-height').value = 90;document.getElementById('light-height-value').innerHTML = 'Light Height: 90';generateMap()">Reset</button>
-      <input type="range" min="-90" max="90" value="90" id="light-height"><span id="light-height-value"></span><br><br>
+      <button class="reset" onclick="document.getElementById('light-height').value = 0;document.getElementById('light-height-value').innerHTML = 'Light Height: 0';generateMap()">Reset</button>
+      <button class="stepper" onmousedown="stepperPressed('light-height','light-height-value',-1)" onmouseup="stepperReleased()"><</button>
+      <input type="range" min="-90" max="90" value="60" step="1" id="light-height">
+      <button class="stepper" onmousedown="stepperPressed('light-height','light-height-value',1)" onmouseup="stepperReleased()">></button>
+      <span id="light-height-value"></span><br><br>
 
       <input type="checkbox" id="isometricRendering" onchange="changeMargin();generateMap();"><span>Toggle Isometric View</span><br>
-      <input type="checkbox" id="blockRendering" onchange="generateMap()"><span>Toggle Isometric Blocks</span><br><br>
-      <input type="checkbox" id="wibbleWobble" onchange="generateMap()"><span>Block Wibble Wobble</span>
+      <input type="checkbox" id="sideFill" onchange="generateMap()"><span>Fill Sides</span><br>
+      <input type="checkbox" id="coastline" onchange="generateMap()"><span>Outline Coast</span><br><br>
+      <input type="checkbox" id="darkMode" onchange="changeBackground();generateMap();"><span>Dark Mode</span><br>
+      <input type="checkbox" id="dynamicMode" onchange="changeBackground();generateMap();"><span>Dynamic Background Color</span>
     </div>
 
     <div class="zoomSliderDiv">
@@ -70,5 +102,6 @@
     </div>
 
   </div>
+  <p id="footer"><span id="footerText">Made by <strong><a href="https://github.com/Michael2-3B" target="_blank">Michael2_3B</a></strong></span></p>
 </body>
 </html>

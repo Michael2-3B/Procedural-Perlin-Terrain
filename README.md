@@ -1,15 +1,11 @@
 # Procedural-Perlin-Terrain
-A Javascript + HTML test program that generates "infinite" procedural terrain using perlin noise, and displays it on the web page in 2D or as an isometric projection.
-
-Please note that this is a work in progress, and as such, may not be super optimized right now.
-
-Feel free to mess around with it!
+A HTML + Javascript page that generates infinite procedural terrain using perlin noise, and displays it on the web page in 2D or as an isometric projection.
 
 ### Features:
-* You can input a world seed
-* You can input offset coordinates, or drag the map around with your cursor
-* You can toggle between 2D/Isometric view
-* Multiple world generation settings (octaves, wavelength, exponent, water level etc)
+* World Seed Input
+* Infinite terrain to explore by dragging the map around with your cursor, or by inputting coordinates.
+* Dynamic shading using a customizable light position and light height
+* Multiple world generation settings (octaves, wavelength, exponent, water level, etc)
 
 
 Try it here!

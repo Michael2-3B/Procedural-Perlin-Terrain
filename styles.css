@@ -14,6 +14,8 @@ input[type='number'] {
 input[type='range']:not(.zoom) {
   background-color: transparent;
   height: 5px;
+  margin-right: 0px;
+  margin-left: 0px;
 }
 
 /** FF*/
@@ -36,11 +38,25 @@ div:not(.siteContainerDiv) {
 }
 
 body {
-  background-color: #dddddd;
+  background-color: rgb(221,221,221);
 }
 
 canvas {
   box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+button {
+  border: 1px solid #111111;
+  background-color: #eeeeee;
+  color: black;
+}
+
+a {
+  color: black;
+}
+
+a:visited {
+  color: black;
 }
 
 .siteContainerDiv {
@@ -77,4 +93,10 @@ canvas {
 
 #canvas-div {
   margin-left: 10px;
+}
+
+#footer {
+  position: fixed;
+  bottom: 0%;
+  left: 1.3%;
 }
