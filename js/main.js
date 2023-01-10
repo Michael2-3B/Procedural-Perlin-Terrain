@@ -1,6 +1,24 @@
 const factor = 255;
 const worldBorder = 29999984;
 
+function saveCheckboxState(checkbox) {
+  localStorage.setItem(checkbox.id, checkbox.checked);
+}
+
+function restoreCheckboxState() {
+  var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(function(checkbox) {
+    var checkboxState = localStorage.getItem(checkbox.id);
+    if (checkboxState == "true") {
+      checkbox.checked = true;
+      if (checkbox.id == "isometricRendering") changeMargin();
+      if (checkbox.id == "darkMode" || checkbox.id == "dynamicMode") changeBackground();
+
+      generateMap();
+    }
+  });
+}
+
 // Define a function to initialize the range inputs and spans
 function initializeRangeInput() {
 
@@ -237,6 +255,8 @@ function initializeRangeInput() {
     button.classList.add("lightButton");
   });
 
+  restoreCheckboxState();
+
   generateMap();
 
 }
@@ -309,7 +329,7 @@ function randomizeInputs() {
   document.getElementById('exponent-input').value = parseFloat(.5+.05*Math.floor(Math.random()*191));
   document.getElementById('exponent-value').innerHTML = "Exponent: " + document.getElementById('exponent-input').value;
 
-  document.getElementById('peaks-input').value = parseFloat(.01*Math.floor(Math.random()*31));
+  document.getElementById('peaks-input').value = parseFloat(.01*Math.floor(Math.random()*26));
   document.getElementById('peaks-value').innerHTML = "Peaks: " + document.getElementById('peaks-input').value;
 
   document.getElementById('water-level').value = Math.floor(Math.random()*192);
@@ -424,9 +444,9 @@ function perlinNoise(width, height, persistence, octaves, wavelengthValue, prng)
       let j = y+parseInt(offsetZ)+worldBorder;
 
       // Calculate the wavelength and amplitude for each octave
-      for (let o = 0, wavelength = wavelengthValue; o < octaves; o++) {
+      for (let o = 0, wavelength = wavelengthValue * 2, amplitude = persistence; o < octaves; o++) {
         wavelength = Math.max(wavelength / 2, 1);
-        const amplitude = persistence / (o+1);
+        amplitude = amplitude / 2;
 
         // Calculate the coordinates of the grid cell that the point is in
         const x0 = Math.floor(k / wavelength);
@@ -450,7 +470,10 @@ function perlinNoise(width, height, persistence, octaves, wavelengthValue, prng)
 
         // Add the value to the Perlin noise value
         noise[x][y] += nxy * amplitude;
+
       }
+
+      noise[x][y] = 0.5-Math.abs(noise[x][y]);
 
       // Convert the Perlin noise value to a terrain value
       noise[x][y] = Math.max(0, Math.min(254, Math.floor(Math.pow((noise[x][y] + 1) / 2 + parseFloat(myPeaks), myExponent) * factor)));
@@ -709,7 +732,9 @@ function generateMap(){
           context.lineTo(pixel3[0], pixel3[1]);
           context.lineTo(pixel2[0], pixel2[1]);
           context.lineTo(pixel0[0], pixel0[1]);
+          if (!isWater) context.stroke();
           context.fill();
+          context.closePath();
 
           if (isWater) context.lineWidth = 0.5;
           context.beginPath();
@@ -717,6 +742,7 @@ function generateMap(){
           context.lineTo(pixel3[0], pixel3[1]);
           context.lineTo(pixel2[0], pixel2[1]);
           context.stroke();
+          context.closePath();
 
         }
 
@@ -771,6 +797,7 @@ function generateMap(){
           context.lineTo(pixel2[0], pixel2[1]);
           context.lineTo(pixel0[0], pixel0[1]);
           context.fill();
+          context.closePath();
         }
 
         if (terrainHighestHeight < waterLevel || terrainLowestHeight >= waterLevel)
@@ -1066,6 +1093,7 @@ function generateMap(){
 
             context.stroke();
             context.fill();
+            context.closePath();
           }
 
           if (vertexList.length > 2) {
@@ -1092,6 +1120,7 @@ function generateMap(){
 
             context.stroke();
             context.fill();
+            context.closePath();
 
 
             // Draw dynamic water tile
@@ -1115,6 +1144,7 @@ function generateMap(){
 
             context.stroke();
             context.fill();
+            context.closePath();
           }
 
           // Fill left water border
@@ -1189,6 +1219,7 @@ function generateMap(){
               context.lineTo(Math.floor(5 * vertexList[linkedPoints[cV+1]][0] + width / 2), Math.floor(5 * vertexList[linkedPoints[cV+1]][1] + height / 2));
 
               context.stroke();
+              context.closePath();
             }
 
           }
