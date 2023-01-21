@@ -45,6 +45,13 @@ canvas {
   box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+label {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Standard */
+}
+
 a {
   color: black;
 }
@@ -87,7 +94,7 @@ a:visited {
   margin-right: 10px;
   margin-left: 10px;
   width: 400px;
-  height: 670px;
+  height: 685px;
   background-color: #eeeeee;
   padding: 10px;
 }

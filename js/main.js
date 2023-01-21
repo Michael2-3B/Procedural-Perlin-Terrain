@@ -27,6 +27,9 @@ function initializeRangeInput() {
   var persistenceInput = document.getElementById('persistence-input');
   var persistenceValue = document.getElementById('persistence-value');
 
+  var amplitudeInput = document.getElementById('amplitude-input');
+  var amplitudeValue = document.getElementById('amplitude-value');
+
   var octavesInput = document.getElementById('octaves-input');
   var octavesValue = document.getElementById('octaves-value');
 
@@ -60,6 +63,7 @@ function initializeRangeInput() {
   // Set the initial value of the spans to the value of the range input
 
   persistenceValue.innerHTML = "Persistence: " + persistenceInput.value;
+  amplitudeValue.innerHTML = "Amplitude: " + amplitudeInput.value;
   octavesValue.innerHTML = "Octaves: " + octavesInput.value;
   wavelengthValue.innerHTML = "Wavelength: " + wavelengthInput.value;
   waterValue.innerHTML = "Water Level: " + waterLevel.value;
@@ -94,6 +98,11 @@ function initializeRangeInput() {
     persistenceValue.innerHTML = "Persistence: " + document.getElementById('persistence-input').value;
     generateMap();
   });
+
+  amplitudeInput.addEventListener('input', function() {
+    amplitudeValue.innerHTML = "Amplitude: " + document.getElementById('amplitude-input').value;
+    generateMap();
+  })
 
   octavesInput.addEventListener('input', function() {
     octavesValue.innerHTML = "Octaves: " + document.getElementById('octaves-input').value;
@@ -287,6 +296,8 @@ function changeSlider(elementId, spanId, direction) {
 
   if (elementId == 'persistence-input') {
     theSpan.innerHTML = 'Persistence: ' + theElement.value;
+  } else if (elementId == 'amplitude-input') {
+    theSpan.innerHTML = 'Amplitude: ' + theElement.value;
   } else if (elementId == 'octaves-input') {
     theSpan.innerHTML = 'Octaves: ' + theElement.value;
   } else if (elementId == 'wavelength-input') {
@@ -415,6 +426,7 @@ function perlinNoise(width, height, persistence, octaves, wavelengthValue, prng)
   const offsetX = document.getElementById('offset-x-input').value;
   const offsetZ = document.getElementById('offset-z-input').value;
 
+  const myAmplitude = document.getElementById('amplitude-input').value;
   const myPeaks = document.getElementById('peaks-input').value;
   const myExponent = document.getElementById('exponent-input').value;
 
@@ -444,9 +456,7 @@ function perlinNoise(width, height, persistence, octaves, wavelengthValue, prng)
       let j = y+parseInt(offsetZ)+worldBorder;
 
       // Calculate the wavelength and amplitude for each octave
-      for (let o = 0, wavelength = wavelengthValue * 2, amplitude = persistence; o < octaves; o++) {
-        wavelength = Math.max(wavelength / 2, 1);
-        amplitude = amplitude / 2;
+      for (let o = 0, wavelength = wavelengthValue, amplitude = myAmplitude; o < octaves; o++) {
 
         // Calculate the coordinates of the grid cell that the point is in
         const x0 = Math.floor(k / wavelength);
@@ -469,11 +479,12 @@ function perlinNoise(width, height, persistence, octaves, wavelengthValue, prng)
         const nxy = lerp(nx0, nx1, ty);
 
         // Add the value to the Perlin noise value
-        noise[x][y] += nxy * amplitude;
+        noise[x][y] += amplitude/4 - Math.abs(nxy * amplitude);
+
+        wavelength = Math.max(wavelength / 2, 1);
+        amplitude *= persistence;
 
       }
-
-      noise[x][y] = 0.5-Math.abs(noise[x][y]);
 
       // Convert the Perlin noise value to a terrain value
       noise[x][y] = Math.max(0, Math.min(254, Math.floor(Math.pow((noise[x][y] + 1) / 2 + parseFloat(myPeaks), myExponent) * factor)));
@@ -816,9 +827,6 @@ function generateMap(){
 
           // 1, 2, or 3 of the points are underwater
           // So draw the water tile dynamically so it wraps to the terrain
-
-          // Convert waterLevel which has a range of 0 to 255, to a range of -1 to 1
-          let perlinWaterLevel = 2*(waterLevel/255)-1;
 
           // calculate slope of the points between each tile vertex
           let slope1 = mapvalue1 - mapvalue0;
